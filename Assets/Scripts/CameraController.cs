@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
@@ -5,10 +6,16 @@ public class CameraController : MonoBehaviour
     public float mouseSensitivity = 100f;
     Transform _playerBody;
     
+    [Header("Camera Pitch")]
     private float _pitch = 0f;
     private float _pitchMin = -90f;
     private float _pitchMax = 90f;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    
+    [Header("Raycast")]
+    public float raycastRange = 100f;
+    private GameObject _lookingAt;
+    
+
     void Start()
     {
         _playerBody = transform.parent.transform;
@@ -33,5 +40,27 @@ public class CameraController : MonoBehaviour
             _pitch = Mathf.Clamp(_pitch, _pitchMin, _pitchMax);
             transform.localRotation = Quaternion.Euler(_pitch, 0f, 0f);
         }
+    }
+
+    private void FixedUpdate()
+    {
+        TargetUpdate();
+    }
+
+    void TargetUpdate()
+    {
+        RaycastHit hit;
+        
+        if (Physics.Raycast(transform.position, transform.forward, out hit, raycastRange))
+        {
+            _lookingAt = hit.collider.gameObject;
+            
+        }
+        else _lookingAt = null;
+    }
+    
+    public GameObject GetLookingAt()
+    {
+        return _lookingAt;
     }
 }

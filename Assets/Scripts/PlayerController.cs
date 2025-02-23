@@ -6,42 +6,52 @@ public class FPSPlayerController : MonoBehaviour
     public float speed;
     public float jumpHeight;
     
-    private Vector3 input;
-    private Vector3 moveDirection;
-    private float airControl = 0.5f;
-    private CharacterController controller;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private Vector3 _input;
+    private Vector3 _moveDirection;
+
+    private CharacterController _controller;
+    private CameraController _cameraController;
+    
+    private GameObject _lookingAt;
+    
+    private void Start()
     {
-        controller = GetComponent<CharacterController>();
+        _controller = GetComponent<CharacterController>();
+        _cameraController = GetComponentInChildren<CameraController>();
     }
 
-    // Update is called once per frame
-    void Update()
+
+    private void Update()
     {
         float moveHorizontal = Input.GetAxis("Horizontal");
         float moveVertical = Input.GetAxis("Vertical");
         
-        input = transform.right * moveHorizontal + transform.forward * moveVertical;
-        input.Normalize();
-        input *= speed;
-
-        if (controller.isGrounded)
+        _input = transform.right * moveHorizontal + transform.forward * moveVertical;
+        _input.Normalize();
+        _input *= speed;
+        
+        _moveDirection = _input;
+        _moveDirection.y += Physics.gravity.y * Time.deltaTime;
+        _controller.Move(Time.deltaTime * _moveDirection);
+        
+        // check if player is interacting with an object
+        if (Input.GetKeyDown(KeyCode.E))
         {
-            moveDirection = input;
-            if (Input.GetButtonDown("Jump"))
+            // looping over components of the object
+            foreach (var component in _lookingAt.GetComponents<MonoBehaviour>())
             {
-                moveDirection.y = Mathf.Sqrt(jumpHeight * -2f * Physics.gravity.y);
+                // check if the object has a child of InteractableObject type
+                if (component is InteractableObject)
+                {
+                    // call the Interact method of the InteractableObject
+                    (component as InteractableObject).Interact();
+                }
             }
         }
-        else
-        {
-            // moveDirection.y = 0.0f;
-            input.y = moveDirection.y;
-            moveDirection = Vector3.Lerp(moveDirection, input, airControl * Time.deltaTime);
-        }
-        
-        moveDirection.y += Physics.gravity.y * Time.deltaTime;
-        controller.Move(Time.deltaTime * moveDirection);
+    }
+    
+    private void FixedUpdate()
+    {
+        _lookingAt = _cameraController.GetLookingAt();
     }
 }
