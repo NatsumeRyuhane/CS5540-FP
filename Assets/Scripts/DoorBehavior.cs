@@ -4,6 +4,7 @@ using UnityEngine;
 public class DoorBehavior : InteractableObject
 {
     private bool _isOpen = false;
+    private GameObject _door;
     private Animator _animator;
     public bool allowInteract = true;
     
