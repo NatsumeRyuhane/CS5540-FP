@@ -7,7 +7,6 @@ public class StageController : MonoBehaviour
     [SerializeField] private GameObject exitDoor;
     
     [Header("Stage Prefab")]
-    [SerializeField] private GameObject stagePrefab;
     [SerializeField] private GameObject endAreaPrefab;
     
     [Header("Pivots")]
@@ -35,14 +34,9 @@ public class StageController : MonoBehaviour
         _lastInstance = instance;
     }
     
-    protected void SetPrefab(GameObject prefab)
-    {
-        stagePrefab = prefab;
-    }
-    
     public void OnStateTransitionTriggered()
     {
-        if (_levelManager.LevelComplete())
+        if (_levelManager.IsLevelComplete)
         {
             Vector3 spawnPos = pivotNext.transform.position;
             spawnPos.y += 1;
@@ -53,20 +47,18 @@ public class StageController : MonoBehaviour
             // instantiate the loop prefab
             Vector3 spawnPos = pivotNext.transform.position;
             spawnPos.y += 1;
-            GameObject newInstance = Instantiate(stagePrefab, spawnPos, pivotNext.transform.rotation);
+            GameObject newInstance = Instantiate(_levelManager.StagePrefab, spawnPos, pivotNext.transform.rotation);
             newInstance.GetComponent<StageController>().SetLastInstance(this.gameObject);
-            newInstance.GetComponent<StageController>().SetPrefab(stagePrefab);
             _levelManager.MoveObjects(spawnPos - transform.position);
-            
-            exitDoor.GetComponent<DoorBehavior>().allowInteract = false;
             exitDoor.GetComponent<DoorBehavior>().Close();
+            exitDoor.GetComponent<DoorBehavior>().allowInteract = false;
         }
     }
     
     public void OnOffloadTriggered()
     {
         Destroy(_lastInstance, 2f);
-        entryDoor.GetComponent<DoorBehavior>().allowInteract = false;
         entryDoor.GetComponent<DoorBehavior>().Close();
+        entryDoor.GetComponent<DoorBehavior>().allowInteract = false;
     }
 }

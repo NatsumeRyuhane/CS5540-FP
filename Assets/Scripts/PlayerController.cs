@@ -1,10 +1,19 @@
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(AudioSource))]
 public class FPSPlayerController : MonoBehaviour
 {
+    
+    
+    [Header("Movement Settings")]
     public float speed;
     public float jumpHeight;
+    public AudioClip[] walkSounds;
+    
+    [Header("Interaction Settings")]
+    public float interactionDistance = 5f;
     
     private Vector3 _input;
     private Vector3 _moveDirection;
@@ -18,6 +27,27 @@ public class FPSPlayerController : MonoBehaviour
     {
         _controller = GetComponent<CharacterController>();
         _cameraController = GetComponentInChildren<CameraController>();
+        StartCoroutine(StartWalkingSound());
+    }
+    
+    private IEnumerator StartWalkingSound()
+    {
+        AudioSource audioSource = GetComponent<AudioSource>();
+        // randomly select a walk sound
+        audioSource.clip = walkSounds[Random.Range(0, walkSounds.Length)];
+        audioSource.Play();
+        while (true)
+        {
+            yield return new WaitForSeconds(0.5f);
+            // if walking, play sound
+            if (_input.magnitude > 0)
+            {
+                audioSource.clip = walkSounds[Random.Range(0, walkSounds.Length)];
+                audioSource.Play();
+            }
+        }
+        
+        yield return null;
     }
 
 
@@ -41,7 +71,8 @@ public class FPSPlayerController : MonoBehaviour
             foreach (var component in _lookingAt.GetComponents<MonoBehaviour>())
             {
                 // check if the object has a child of InteractableObject type
-                if (component is InteractableObject)
+                if (component is InteractableObject && component.enabled && 
+                    Vector3.Distance(transform.position, _lookingAt.transform.position) <= interactionDistance)
                 {
                     // call the Interact method of the InteractableObject
                     (component as InteractableObject).Interact();
