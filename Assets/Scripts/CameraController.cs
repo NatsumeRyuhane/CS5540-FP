@@ -15,6 +15,8 @@ public class CameraController : MonoBehaviour
     public float raycastRange = 100f;
     private GameObject _lookingAt;
     
+    private LevelManager _levelManager;
+    
 
     void Start()
     {
@@ -22,11 +24,15 @@ public class CameraController : MonoBehaviour
         
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+        
+        _levelManager = FindFirstObjectByType<LevelManager>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!_levelManager.AllowPlayerControl) return;
+        
         float moveX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float moveY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
