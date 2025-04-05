@@ -1,0 +1,11 @@
+Model Information:
+* title:	duck floaty
+* source:	https://sketchfab.com/3d-models/duck-floaty-1467f79dc22e46c49e68a688865e9f70
+* author:	raholder0909 (https://sketchfab.com/raholder0909)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "duck floaty" (https://sketchfab.com/3d-models/duck-floaty-1467f79dc22e46c49e68a688865e9f70) by raholder0909 (https://sketchfab.com/raholder0909) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
