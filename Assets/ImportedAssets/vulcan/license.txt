@@ -1,0 +1,11 @@
+Model Information:
+* title:	Vulcan
+* source:	https://sketchfab.com/3d-models/vulcan-a9f8a85b4d6842cf9e10b7b5d4070dc2
+* author:	Geoffrey Marchal (https://sketchfab.com/geoffreymarchal)
+
+Model License:
+* license type:	CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+* requirements:	Author must be credited. No commercial use. Modified versions must have the same license.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Vulcan" (https://sketchfab.com/3d-models/vulcan-a9f8a85b4d6842cf9e10b7b5d4070dc2) by Geoffrey Marchal (https://sketchfab.com/geoffreymarchal) licensed under CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
