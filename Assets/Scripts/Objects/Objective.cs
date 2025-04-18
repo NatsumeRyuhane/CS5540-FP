@@ -4,7 +4,7 @@ namespace Objects
 {
     public record Objective() 
     {
-        public int id { get; set; }
+        public int ID { get; set; }
         public string Description { get; set; }
         public TextMeshProUGUI UIElement { get; set; }
         public bool IsActive { get; set; }

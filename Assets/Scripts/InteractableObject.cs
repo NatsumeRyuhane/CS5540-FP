@@ -3,38 +3,50 @@ using UnityEngine;
 
 public abstract class InteractableObject : MonoBehaviour
 {
-    private LevelUIManager _levelUIManager;
-    
+    protected LevelUIManager LevelUIManager;
+    protected PlayerController PlayerController;
+
+    private void Awake()
+    {
+        PlayerController = FindFirstObjectByType<PlayerController>();
+        LevelUIManager = FindFirstObjectByType<LevelUIManager>();
+    }
+
     public abstract void Interact();
-    public abstract void InteractEffect();
-    
+    protected abstract void InteractEffect();
+
+    protected bool IsPlayerLookingAtThis()
+    {
+        if (PlayerController == null)
+            return false;
+
+        return (PlayerController.GetPlayerLookingAt() == gameObject);
+    }
+
     protected IEnumerator DoLongHold(float duration)
     {
         float timer = 0f;
         float progress = 0f;
-        
-        if (_levelUIManager == null)
-        {
-            _levelUIManager = FindFirstObjectByType<LevelUIManager>();
-        }
-        _levelUIManager.FadeInActionCastBar();
-        
+
+        LevelUIManager?.FadeInActionCastBar();
+
         while (timer < duration)
         {
-            if (Input.GetKey(KeyCode.E))
+            if (Input.GetKey(KeyCode.E) && IsPlayerLookingAtThis())
             {
                 timer += Time.deltaTime;
                 progress = timer / duration;
-                _levelUIManager.UpdateActionCastBar(progress);
+                LevelUIManager?.UpdateActionCastBar(progress);
                 yield return null;
             }
             else
             {
-                _levelUIManager.FadeOutActionCastBar();
+                LevelUIManager?.FadeOutActionCastBar();
                 yield break;
             }
         }
-        _levelUIManager.FadeOutActionCastBar();
+
+        LevelUIManager?.FadeOutActionCastBar();
         InteractEffect();
     }
 }

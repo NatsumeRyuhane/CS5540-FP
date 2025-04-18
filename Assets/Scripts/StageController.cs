@@ -17,6 +17,9 @@ public class StageController : MonoBehaviour
     
     private TransitionTrigger _transitionTrigger;
     private OffloadTrigger _offloadTrigger;
+    
+    private bool _containsAnomaly;
+    
     private void Start()
     {
         _levelManager = FindFirstObjectByType<LevelManager>();
@@ -34,6 +37,11 @@ public class StageController : MonoBehaviour
         _lastInstance = instance;
     }
     
+    public void SetContainsAnomaly(bool containsAnomaly)
+    {
+        _containsAnomaly = containsAnomaly;
+    }
+    
     public void OnStateTransitionTriggered()
     {
         if (_levelManager.IsLevelComplete)
@@ -44,12 +52,12 @@ public class StageController : MonoBehaviour
         }
         else
         {
-            // instantiate the loop prefab
             Vector3 spawnPos = pivotNext.transform.position;
             spawnPos.y += 1;
-            GameObject newInstance = Instantiate(_levelManager.StagePrefab, spawnPos, pivotNext.transform.rotation);
+            GameObject newInstance = Instantiate(_levelManager.stagePrefab, spawnPos, pivotNext.transform.rotation);
             newInstance.GetComponent<StageController>().SetLastInstance(this.gameObject);
             _levelManager.MoveObjects(spawnPos - transform.position);
+            
             exitDoor.GetComponent<DoorBehavior>().Close();
             exitDoor.GetComponent<DoorBehavior>().allowInteract = false;
         }
@@ -57,8 +65,27 @@ public class StageController : MonoBehaviour
     
     public void OnOffloadTriggered()
     {
-        Destroy(_lastInstance, 2f);
         entryDoor.GetComponent<DoorBehavior>().Close();
         entryDoor.GetComponent<DoorBehavior>().allowInteract = false;
+        
+        // check if the anomaly in last instance is resolved correctly
+        if (_lastInstance == null)
+        {
+            return;
+        }
+        
+        var lastInstanceContainsAnomaly = _lastInstance.GetComponent<StageController>()._containsAnomaly;
+        var wasButtonPressed = _levelManager.WasButtonPressed;
+        if (wasButtonPressed ^ lastInstanceContainsAnomaly)
+        {
+            // do nothing
+        }
+        else
+        {
+            _levelManager.ResetLevelProgress();
+        }
+        
+        
+        Destroy(_lastInstance, 2f);
     }
 }
