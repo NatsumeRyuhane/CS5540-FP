@@ -1,74 +1,104 @@
-using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class LoadingManager : Singleton<LoadingManager>
 {
     private Image _progressBar;
     private TextMeshProUGUI _loadingText;
     private string _sceneName;
+
     // Call this method to load a new scene with the loading screen
-    
     public void LoadScene(string sceneName)
     {
         _sceneName = sceneName;
-        
-        // offload current scene and switch to loading screen
+
+        // Validate if the scene exists
+        if (!Application.CanStreamedLevelBeLoaded(_sceneName))
+        {
+            Debug.LogError($"Scene '{_sceneName}' does not exist or cannot be loaded.");
+            StartCoroutine(DisplayErrorMessage($"ERROR: Scene '{_sceneName}' not found. Please check the level name."));
+            return;
+        }
+
+        // Offload current scene and switch to loading screen
         StartCoroutine(LoadSceneAsync());
     }
 
     private IEnumerator LoadSceneAsync()
     {
         // Load the loading scene first
-        yield return SceneManager.LoadSceneAsync("Loading", LoadSceneMode.Single);
-        SceneManager.SetActiveScene(SceneManager.GetSceneByName("Loading"));
-        
-        // Find the progress bar and loading text in the scene
-        _progressBar = GameObject.Find("Progress").GetComponent<Image>();
-        _loadingText = GameObject.Find("LoadingText").GetComponent<TextMeshProUGUI>();
-        
-        // Reset progress bar
-        _progressBar.fillAmount = 0f;
-        
-        // Start loading the scene in the background
-        AsyncOperation operation = SceneManager.LoadSceneAsync(_sceneName);
-        
-        // Don't allow the scene to activate until we're ready
-        operation.allowSceneActivation = false;
-        
-        // Track loading progress
-        while (!operation.isDone)
+        var loadLoadingScene = SceneManager.LoadSceneAsync("Loading", LoadSceneMode.Single);
+        loadLoadingScene.allowSceneActivation = true;
+        while (!loadLoadingScene.isDone)
         {
-
-            // Unity's AsyncOperation ranges from 0 to 0.9 during loading
-            // We convert it to a 0 to 1 range for our progress bar
-            float progress = Mathf.Clamp01(operation.progress / 0.9f);
-            
-            // Update the progress bar
-            _progressBar.fillAmount = progress;
-            
-            // Allow scene activation when loading is at 90%
-            if (operation.progress >= 0.9f)
-            {
-                _loadingText.text = "PRESS ANY KEY TO CONTINUE";
-                if (Input.anyKeyDown)
-                {
-                    // Wait a brief moment to ensure UI updates
-                    yield return new WaitForSeconds(0.2f);
-                
-                    // Allow the scene to activate
-                    operation.allowSceneActivation = true;
-                
-                    // Hide loading screen after a short delay to ensure smooth transition
-                    yield return new WaitForSeconds(0.1f);
-                }
-                
-            }
-            
             yield return null;
         }
+
+        Debug.Log("Loading scene: " + _sceneName);
+
+        // Reset references since we're in a new scene
+        FindUIReferences();
+
+        // Reset progress bar
+        if (_progressBar != null)
+            _progressBar.fillAmount = 0f;
+
+        // Start loading the scene in the background
+        var asyncLoad = SceneManager.LoadSceneAsync(_sceneName);
+        if (asyncLoad == null)
+        {
+            Debug.LogError($"Failed to load scene '{_sceneName}'.");
+            yield break;
+        }
+
+        asyncLoad.allowSceneActivation = true;
+
+        // Track loading progress
+        while (!asyncLoad.isDone)
+        {
+            float progress = Mathf.Clamp01(asyncLoad.progress);
+            if (_progressBar != null)
+                _progressBar.fillAmount = progress;
+
+            yield return null;
+        }
+    }
+
+    private void FindUIReferences()
+    {
+        GameObject progressBarObject = GameObject.Find("Progress");
+        GameObject loadingTextObject = GameObject.Find("LoadingText");
+
+        if (progressBarObject == null || loadingTextObject == null)
+        {
+            Debug.LogError("Loading UI components not found in the scene.");
+            return;
+        }
+
+        _progressBar = progressBarObject.GetComponent<Image>();
+        _loadingText = loadingTextObject.GetComponent<TextMeshProUGUI>();
+    }
+
+    private IEnumerator DisplayErrorMessage(string message)
+    {
+        // Load the loading scene first
+        yield return SceneManager.LoadSceneAsync("Loading", LoadSceneMode.Single);
+        SceneManager.SetActiveScene(SceneManager.GetSceneByName("Loading"));
+
+        GameObject loadingTextObject = GameObject.Find("LoadingText");
+
+        if (loadingTextObject == null)
+        {
+            Debug.LogError("LoadingText UI component not found in the scene.");
+            yield break;
+        }
+
+        _loadingText = loadingTextObject.GetComponent<TextMeshProUGUI>();
+        _loadingText.text = message;
+
+        yield return new WaitForSeconds(5f);
     }
 }

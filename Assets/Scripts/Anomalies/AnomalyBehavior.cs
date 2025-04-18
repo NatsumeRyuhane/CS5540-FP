@@ -4,15 +4,8 @@ using UnityEngine;
 [RequireComponent(typeof(Collider))]
 public abstract class AnomalyBehavior : InteractableObject
 {
-    protected PlayerController _player;
     protected bool _isActive { get; private set; }
     protected bool _isResolved { get; private set; }
-    
-    private void Awake()
-    {
-        _player = FindFirstObjectByType<PlayerController>();
-        OnAwake();
-    }
     
     protected bool IsThisVisibleInCamera()
     {
@@ -39,8 +32,6 @@ public abstract class AnomalyBehavior : InteractableObject
     {
         _isResolved = isResolved;
     }
-
-    protected abstract void OnAwake();
     
     protected abstract void OnAnomalyEffectEnd();
 
