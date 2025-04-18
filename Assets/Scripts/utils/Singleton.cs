@@ -15,7 +15,7 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
     [SerializeField] private bool dontDestroyOnLoad = false;
     
     // Public property to access the singleton instance
-    public static T instance
+    public static T Instance
     {
         get
         {
@@ -27,9 +27,22 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
                 // If it still doesn't exist, create a new GameObject with the component
                 if (_instance == null)
                 {
+                    // Create at root level to ensure proper scene transitions
                     GameObject singletonObject = new GameObject(typeof(T).Name);
                     _instance = singletonObject.AddComponent<T>();
-                    Debug.Log($"[Singleton] An instance of {typeof(T)} was created.");
+                    Debug.Log($"[Singleton] An instance of {typeof(T)} was created at the root level.");
+                }
+                else
+                {
+                    // Check if the found instance should be DontDestroyOnLoad but isn't at root level
+                    Singleton<T> singletonComponent = _instance as Singleton<T>;
+                    if (singletonComponent != null && singletonComponent.dontDestroyOnLoad && 
+                        singletonComponent.transform.parent != null)
+                    {
+                        // Move to root if it has a parent but needs to persist between scenes
+                        Debug.Log($"[Singleton] Moving {typeof(T)} to root level for proper scene transition handling.");
+                        singletonComponent.transform.SetParent(null);
+                    }
                 }
             }
             
@@ -55,9 +68,17 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
         // Assign this as the instance if none exists
         _instance = this as T;
         
-        // If _destroyOnLoad is true, make this object persist between scene loads
+        // If dontDestroyOnLoad is true, ensure we're at root level then make persistent
         if (dontDestroyOnLoad)
+        {
+            // Ensure the object is at the root level for proper DontDestroyOnLoad behavior
+            if (transform.parent != null)
+            {
+                transform.SetParent(null);
+                Debug.Log($"[Singleton] {typeof(T)} moved to scene root for proper persistence between scenes.");
+            }
             DontDestroyOnLoad(gameObject);
+        }
         
         OnAwake();
     }
