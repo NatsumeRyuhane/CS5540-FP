@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// Generic Singleton base class for MonoBehaviours that need to follow the Singleton pattern.
@@ -10,6 +11,8 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 {
     // Protected variable for the instance
     private static T _instance;
+    
+    [SerializeField] private bool dontDestroyOnLoad = false;
     
     // Public property to access the singleton instance
     public static T instance
@@ -52,8 +55,9 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
         // Assign this as the instance if none exists
         _instance = this as T;
         
-        // By default, we'll keep singleton objects when loading new scenes
-        DontDestroyOnLoad(gameObject);
+        // If _destroyOnLoad is true, make this object persist between scene loads
+        if (dontDestroyOnLoad)
+            DontDestroyOnLoad(gameObject);
         
         OnAwake();
     }

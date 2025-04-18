@@ -6,39 +6,44 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class LevelManager : MonoBehaviour
+public class LevelManager : Singleton<LevelManager>
 {
     [SerializeField] private GameObject persistentObjectsAnchor;
-    private HashSet<TargetBehavior> _targets = new HashSet<TargetBehavior>();
-    private List<Objects.Objective> _objectives = new List<Objects.Objective>();
-    
+    private readonly HashSet<TargetBehavior> _targets = new HashSet<TargetBehavior>();
+    private readonly List<Objects.Objective> _objectives = new List<Objects.Objective>();
     
     [Header("Level Info")]
-    public string levelName;
+    public string levelDisplayName;
+    public string nextLevelName;
 
     [Header("Level Config")] 
     public float levelTime;
+    
+    public AnomalyBehavior[] anomalies;
+    
 
-    public GameObject StagePrefab;
+    [FormerlySerializedAs("StagePrefab")] public GameObject stagePrefab;
     
     [HideInInspector] public float LevelTimer { get; private set; }
     [HideInInspector] public bool IsLevelComplete { get; private set; }
     [HideInInspector] public bool IsLevelFailed { get; private set; }
     [HideInInspector] public bool AllowPlayerControl { get; private set; }
 
+    [HideInInspector] public bool WasButtonPressed {get; private set;}
+
 
     private LevelUIManager _UIManager;
     private void Start()
     {
         _UIManager = FindFirstObjectByType<LevelUIManager>();
-        _UIManager.UpdateLevelName(levelName);
+        _UIManager.UpdateLevelName(levelDisplayName);
         _UIManager.UpdateTime("12 AM");
         StartCoroutine(HideGuideText());
         
         SetAllowPlayerControl(true);
         StartCoroutine(_UIManager.FirePlayerMessage("I need to get out before the clock strikes 6 AM."));
         
-        CreateLevelObjective("Find and interact with all anomallies (cubes, for now).");
+        CreateLevelObjective("Find and report any anomaly.");
     }
 
     public void CreateLevelObjective(String objective)
@@ -72,7 +77,7 @@ public class LevelManager : MonoBehaviour
             }
         }
         
-        var objDesc = "Find and interact with all anomallies (cubes, for now). (" + completed + "/" + total + ")";
+        var objDesc = "Find and interact with all anomaly. (" + completed + "/" + total + ")";
         _UIManager.UpdateObjective(objDesc, obj.UIElement);
     }
     
@@ -110,7 +115,7 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    public void CheckLevelComplete()
+    public void CheckLevelCompleteCondition()
     { 
         UpdateLevelObjective();
        foreach (var t in _targets)
@@ -125,6 +130,13 @@ public class LevelManager : MonoBehaviour
        
        IsLevelComplete = true;
        return;
+    }
+    
+    void LevelComplete()
+    {
+        IsLevelComplete = true;
+        SetAllowPlayerControl(false);
+        StartCoroutine(_UIManager.DoLevelCompleteSequence(3));
     }
 
     void LevelFail()
@@ -146,6 +158,24 @@ public class LevelManager : MonoBehaviour
        persistentObjectsAnchor.transform.position += direction;
     }
     
+    public void SetButtonPressed(bool pressed)
+    {
+        WasButtonPressed = pressed;
+    }
+
+    public void ResetLevelProgress()
+    {
+        foreach (var t in _targets)
+        {
+            t.Reset();
+        }
+        
+        foreach (var a in anomalies)
+        {
+            a.Reset();
+        }
+    }
+    
     public void ReloadLevel()
     {
         // Reload the level
@@ -161,7 +191,13 @@ public class LevelManager : MonoBehaviour
     public void RegisterTarget(TargetBehavior target)
     {
         _targets.Add(target);
-        CheckLevelComplete();
+        CheckLevelCompleteCondition();
         UpdateLevelObjective();
+    }
+    
+    public void LoadNextLevel()
+    {
+        // Load the next level
+        LoadingManager.instance.LoadScene(nextLevelName);
     }
 }

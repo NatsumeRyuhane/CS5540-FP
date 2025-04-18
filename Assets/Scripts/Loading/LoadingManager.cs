@@ -11,6 +11,7 @@ public class LoadingManager : Singleton<LoadingManager>
     private TextMeshProUGUI _loadingText;
     private string _sceneName;
     // Call this method to load a new scene with the loading screen
+    
     public void LoadScene(string sceneName)
     {
         _sceneName = sceneName;
@@ -41,6 +42,7 @@ public class LoadingManager : Singleton<LoadingManager>
         // Track loading progress
         while (!operation.isDone)
         {
+
             // Unity's AsyncOperation ranges from 0 to 0.9 during loading
             // We convert it to a 0 to 1 range for our progress bar
             float progress = Mathf.Clamp01(operation.progress / 0.9f);

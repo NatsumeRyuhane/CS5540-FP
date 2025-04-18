@@ -9,6 +9,8 @@ public class TargetBehavior : InteractableObject
     [HideInInspector] public bool Completed { get; private set; }
     private LevelManager _levelManager;
     private AudioSource _audioSource;
+
+    private bool _isInitialActive;
     
     public void Start()
     {
@@ -16,6 +18,7 @@ public class TargetBehavior : InteractableObject
         _levelManager = FindFirstObjectByType<LevelManager>();
         _levelManager.RegisterTarget(this);
         _audioSource = GetComponent<AudioSource>();
+        _isInitialActive = gameObject.activeSelf;
     }
     
     public override void Interact()
@@ -23,11 +26,11 @@ public class TargetBehavior : InteractableObject
         StartCoroutine(base.DoLongHold(3));
     }
     
-    public override void InteractEffect()
+    protected override void InteractEffect()
     {
         Completed = true;
         GetComponent<Renderer>().material.color = completedColor;
-        _levelManager.CheckLevelComplete();
+        _levelManager.CheckLevelCompleteCondition();
         StartCoroutine(DoPostCompleteAnim(3f));
     }
     
@@ -54,5 +57,12 @@ public class TargetBehavior : InteractableObject
         // Ensure the object is fully transparent at the end
         renderer.material.color = new Color(initialColor.r, initialColor.g, initialColor.b, 0);
         gameObject.SetActive(false); // Optionally deactivate the object
+    }
+    
+    public void Reset()
+    {
+        Completed = false;
+        GetComponent<Renderer>().material.color = Color.white;
+        gameObject.SetActive(_isInitialActive);
     }
 }

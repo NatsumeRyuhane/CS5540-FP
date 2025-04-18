@@ -5,7 +5,7 @@ public class MainMenuBehavior : MonoBehaviour
     public static void NewGame()
     {
         // Load the game's first level using the LoadingManager
-        LoadingManager.instance.LoadScene("Level1");
+        LoadingManager.instance.LoadScene("Level2");
     }
 
     public static void Continue()

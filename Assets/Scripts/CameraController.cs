@@ -1,30 +1,28 @@
 using System;
 using UnityEngine;
 
-public class CameraController : MonoBehaviour
+public class CameraController : Singleton<CameraController>
 {
     public float mouseSensitivity = 100f;
     Transform _playerBody;
-    
-    [Header("Camera Pitch")]
-    private float _pitch = 0f;
+
+    [Header("Camera Pitch")] private float _pitch = 0f;
     private float _pitchMin = -90f;
     private float _pitchMax = 90f;
-    
-    [Header("Raycast")]
-    public float raycastRange = 100f;
+
+    [Header("Raycast")] public float raycastRange = 100f;
     private GameObject _lookingAt;
-    
+
     private LevelManager _levelManager;
-    
+
 
     void Start()
     {
         _playerBody = transform.parent.transform;
-        
+
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
-        
+
         _levelManager = FindFirstObjectByType<LevelManager>();
     }
 
@@ -32,7 +30,7 @@ public class CameraController : MonoBehaviour
     void Update()
     {
         if (!_levelManager.AllowPlayerControl) return;
-        
+
         float moveX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float moveY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
@@ -40,7 +38,7 @@ public class CameraController : MonoBehaviour
         {
             // yaw rotation
             _playerBody.Rotate(Vector3.up * moveX);
-            
+
             // pitch rotation
             _pitch -= moveY;
             _pitch = Mathf.Clamp(_pitch, _pitchMin, _pitchMax);
@@ -56,15 +54,14 @@ public class CameraController : MonoBehaviour
     void TargetUpdate()
     {
         RaycastHit hit;
-        
+
         if (Physics.Raycast(transform.position, transform.forward, out hit, raycastRange))
         {
             _lookingAt = hit.collider.gameObject;
-            
         }
         else _lookingAt = null;
     }
-    
+
     public GameObject GetLookingAt()
     {
         return _lookingAt;

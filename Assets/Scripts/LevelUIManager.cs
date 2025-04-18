@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class LevelUIManager : MonoBehaviour
+public class LevelUIManager : Singleton<LevelUIManager>
 {
     [Header("UI Elements")]
     public GameObject objectives;
@@ -13,8 +13,9 @@ public class LevelUIManager : MonoBehaviour
     public TextMeshProUGUI levelNameText;
     public TextMeshProUGUI guideText;
     public TextMeshProUGUI playerMessageText;
-    public Image levelFailMask;
+    [FormerlySerializedAs("levelFailMask")] public Image levelEndMask;
     public GameObject levelFailUI;
+    public GameObject lavelWinUI;
     public Image actionCastBar;
     public Image actionCastBarProgress;
     
@@ -95,21 +96,39 @@ public class LevelUIManager : MonoBehaviour
     public IEnumerator DoLevelFailSequence(float duration)
     { 
         // fade in the mask
-        levelFailMask.gameObject.SetActive(true);
-        levelFailMask.color = new Color(0, 0, 0, 0);
-        while (levelFailMask.color.a < 1)
+        levelEndMask.gameObject.SetActive(true);
+        levelEndMask.color = new Color(0, 0, 0, 0);
+        while (levelEndMask.color.a < 1)
         {
-            levelFailMask.color = new Color(0, 0, 0, levelFailMask.color.a + Time.deltaTime / duration);
+            levelEndMask.color = new Color(0, 0, 0, levelEndMask.color.a + Time.deltaTime / duration);
             yield return null;
         }
         yield return new WaitForSeconds(2);
         levelFailUI.SetActive(true);
     }
     
-
+    public IEnumerator DoLevelCompleteSequence(float duration)
+    { 
+        // fade in the mask
+        levelEndMask.gameObject.SetActive(true);
+        levelEndMask.color = new Color(0, 0, 0, 0);
+        while (levelEndMask.color.a < 1)
+        {
+            levelEndMask.color = new Color(0, 0, 0, levelEndMask.color.a + Time.deltaTime / duration);
+            yield return null;
+        }
+        yield return new WaitForSeconds(2);
+        lavelWinUI.SetActive(true);
+    }
     
     private IEnumerator FadeInText(TextMeshProUGUI text, float duration)
     {
+        // if the text is already visible do nothing
+        if (Mathf.Abs(text.alpha - 1.0f) < Mathf.Epsilon || text.gameObject.activeSelf)
+        {
+            yield break;
+        }
+        
         float startAlpha = text.alpha;
         float time = 0;
 
@@ -124,6 +143,12 @@ public class LevelUIManager : MonoBehaviour
     
     private IEnumerator FadeOutText(TextMeshProUGUI text, float duration)
     {
+        // if the text is already invisible do nothing
+        if (text.alpha == 0 || !text.gameObject.activeSelf)
+        {
+            yield break;
+        }
+        
         float startAlpha = text.alpha;
         float time = 0;
 
@@ -138,6 +163,12 @@ public class LevelUIManager : MonoBehaviour
     
     private IEnumerator FadeInImage(Image image, float duration)
     {
+        // if the image is already visible do nothing
+        if (Mathf.Abs(image.color.a - 1.0f) < Mathf.Epsilon || image.gameObject.activeSelf)
+        {
+            yield break;
+        }
+        
         float startAlpha = image.color.a;
         float time = 0;
 
@@ -152,6 +183,12 @@ public class LevelUIManager : MonoBehaviour
     
     private IEnumerator FadeOutImage(Image image, float duration)
     {
+        // if the image is already invisible do nothing
+        if (image.color.a == 0 || !image.gameObject.activeSelf)
+        {
+            yield break;
+        }
+        
         float startAlpha = image.color.a;
         float time = 0;
 
@@ -163,7 +200,6 @@ public class LevelUIManager : MonoBehaviour
         }
         image.color = new Color(image.color.r, image.color.g, image.color.b, 0);
     }
-        
     
     public void UpdateActionCastBar(float progress)
     {
