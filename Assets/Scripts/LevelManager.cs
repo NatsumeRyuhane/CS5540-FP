@@ -35,13 +35,13 @@ public class LevelManager : Singleton<LevelManager>
     private LevelUIManager _UIManager;
     private void Start()
     {
-        _UIManager = FindFirstObjectByType<LevelUIManager>();
+        _UIManager = LevelUIManager.Instance;
         _UIManager.UpdateLevelName(levelDisplayName);
         _UIManager.UpdateTime("12 AM");
         StartCoroutine(HideGuideText());
         
         SetAllowPlayerControl(true);
-        StartCoroutine(_UIManager.FirePlayerMessage("I need to get out before the clock strikes 6 AM."));
+        _UIManager.FirePlayerMessage("I need to get out before the clock strikes 6 AM.");
         
         CreateLevelObjective("Find and report any anomaly.");
     }
@@ -132,18 +132,18 @@ public class LevelManager : Singleton<LevelManager>
        return;
     }
     
-    void LevelComplete()
+    public void LevelComplete()
     {
         IsLevelComplete = true;
         SetAllowPlayerControl(false);
-        StartCoroutine(_UIManager.DoLevelCompleteSequence(3));
+        _UIManager.DoLevelCompleteSequence(3);
     }
 
-    void LevelFail()
+    public void LevelFail()
     {
         IsLevelFailed = true;
         SetAllowPlayerControl(false);
-        StartCoroutine(_UIManager.DoLevelFailSequence(3));
+        _UIManager.DoLevelFailSequence(3);
     }
     
     public void SetAllowPlayerControl(bool allow)
@@ -179,7 +179,7 @@ public class LevelManager : Singleton<LevelManager>
     public void ReloadLevel()
     {
         // Reload the level
-        LoadingManager.instance.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+        LoadingManager.Instance.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
     }
     
     public void ExitToMainMenu()
@@ -198,6 +198,6 @@ public class LevelManager : Singleton<LevelManager>
     public void LoadNextLevel()
     {
         // Load the next level
-        LoadingManager.instance.LoadScene(nextLevelName);
+        LoadingManager.Instance.LoadScene(nextLevelName);
     }
 }

@@ -1,5 +1,4 @@
-using System;
-using System.Collections;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -15,12 +14,19 @@ public class LevelUIManager : Singleton<LevelUIManager>
     public TextMeshProUGUI playerMessageText;
     [FormerlySerializedAs("levelFailMask")] public Image levelEndMask;
     public GameObject levelFailUI;
-    public GameObject lavelWinUI;
+    [FormerlySerializedAs("lavelWinUI")] public GameObject levelWinUI;
     public Image actionCastBar;
     public Image actionCastBarProgress;
     
     [Header("UI Prefabs")]
     public GameObject objectiveTextPrefab;
+
+    // Store references to active tweens for interruption handling
+    private Tween _playerMessageTween;
+    private Tween _guideTextTween;
+    private Tween _actionCastBarTween;
+    private Tween _actionCastBarProgressTween;
+    private Tween _levelEndMaskTween;
 
     private void Start()
     {
@@ -33,10 +39,14 @@ public class LevelUIManager : Singleton<LevelUIManager>
     {
         // create a TMP under objectives
         var newObjective = Instantiate(objectiveTextPrefab, objectives.transform);
-        newObjective.GetComponent<TextMeshProUGUI>().text = objective;
-        newObjective.GetComponent<TextMeshProUGUI>().alpha = 0; // start invisible
-        StartCoroutine(FadeInText(newObjective.GetComponent<TextMeshProUGUI>(), 0.5f));
-        return newObjective.GetComponent<TextMeshProUGUI>();
+        var objectiveText = newObjective.GetComponent<TextMeshProUGUI>();
+        objectiveText.text = objective;
+        objectiveText.alpha = 0; // start invisible
+        
+        // Use DOTween to fade in
+        objectiveText.DOFade(1f, 0.5f);
+        
+        return objectiveText;
     }
     
     public void UpdateObjective(string objective, TextMeshProUGUI objectiveText)
@@ -46,16 +56,27 @@ public class LevelUIManager : Singleton<LevelUIManager>
     
     public void CompleteObjective(TextMeshProUGUI objectiveText)
     {
-        StartCoroutine(FadeInText(objectiveText, 0.5f));
-        Destroy(objectiveText.gameObject, 0.5f);
+        // Kill any running animations on this text
+        DOTween.Kill(objectiveText);
+        
+        // Fade in then destroy
+        objectiveText.DOFade(0f, 0.5f).OnComplete(() => {
+            Destroy(objectiveText.gameObject);
+        });
     }
     
     public void FailObjective(TextMeshProUGUI objectiveText)
     {
+        // Kill any running animations on this text
+        DOTween.Kill(objectiveText);
+        
         objectiveText.text = "Objective Failed: " + objectiveText.text;
         objectiveText.color = Color.red;
-        StartCoroutine(FadeInText(objectiveText, 0.5f));
-        Destroy(objectiveText.gameObject, 0.5f);
+        
+        // Fade out then destroy
+        objectiveText.DOFade(0f, 0.5f).OnComplete(() => {
+            Destroy(objectiveText.gameObject);
+        });
     }
     
     public void UpdateTime(string time)
@@ -75,130 +96,104 @@ public class LevelUIManager : Singleton<LevelUIManager>
     
     public void SetGuideTextDisplay(bool display)
     {
-        if (display)
+        // Kill any running animation on guide text
+        if (_guideTextTween != null)
         {
-            StartCoroutine(FadeInText(guideText, 0.5f));
+            _guideTextTween.Kill();
+            _guideTextTween = null;
         }
-        else
-        {
-            StartCoroutine(FadeOutText(guideText, 0.5f));
-        }
+        
+        float targetAlpha = display ? 1f : 0f;
+        _guideTextTween = guideText.DOFade(targetAlpha, 0.5f);
     }
     
-    public IEnumerator FirePlayerMessage(string message, float duration = 5f)
+    public void FirePlayerMessage(string message, float duration = 5f)
     {
+        // Update message text
         playerMessageText.text = message;
-        StartCoroutine(FadeInText(playerMessageText, 0.5f));
-        yield return new WaitForSeconds(duration);
-        StartCoroutine(FadeOutText(playerMessageText, 0.5f));
+        
+        // Kill any existing animation sequence
+        if (_playerMessageTween != null)
+        {
+            _playerMessageTween.Kill();
+            _playerMessageTween = null;
+        }
+        
+        // Create a new animation sequence
+        Sequence messageSequence = DOTween.Sequence();
+        
+        // If text is not already visible, fade it in
+        if (playerMessageText.alpha < 0.99f)
+        {
+            messageSequence.Append(playerMessageText.DOFade(1f, 0.5f));
+        }
+        
+        // Wait for duration
+        messageSequence.AppendInterval(duration);
+        
+        // Fade out
+        messageSequence.Append(playerMessageText.DOFade(0f, 0.5f));
+        
+        // Store the sequence reference
+        _playerMessageTween = messageSequence;
     }
     
-    public IEnumerator DoLevelFailSequence(float duration)
+    public void DoLevelFailSequence(float duration)
     { 
-        // fade in the mask
+        // Kill any existing level end animation
+        if (_levelEndMaskTween != null)
+        {
+            _levelEndMaskTween.Kill();
+            _levelEndMaskTween = null;
+        }
+        
+        // Setup the level end mask
         levelEndMask.gameObject.SetActive(true);
         levelEndMask.color = new Color(0, 0, 0, 0);
-        while (levelEndMask.color.a < 1)
-        {
-            levelEndMask.color = new Color(0, 0, 0, levelEndMask.color.a + Time.deltaTime / duration);
-            yield return null;
-        }
-        yield return new WaitForSeconds(2);
-        levelFailUI.SetActive(true);
+        
+        // Create animation sequence
+        Sequence failSequence = DOTween.Sequence();
+        
+        // Fade in the mask
+        failSequence.Append(levelEndMask.DOFade(1f, duration));
+        
+        // Wait for 2 seconds
+        failSequence.AppendInterval(2f);
+        
+        // Show the fail UI
+        failSequence.AppendCallback(() => levelFailUI.SetActive(true));
+        
+        // Store the sequence reference
+        _levelEndMaskTween = failSequence;
     }
     
-    public IEnumerator DoLevelCompleteSequence(float duration)
+    public void DoLevelCompleteSequence(float duration)
     { 
-        // fade in the mask
+        // Kill any existing level end animation
+        if (_levelEndMaskTween != null)
+        {
+            _levelEndMaskTween.Kill();
+            _levelEndMaskTween = null;
+        }
+        
+        // Setup the level end mask
         levelEndMask.gameObject.SetActive(true);
         levelEndMask.color = new Color(0, 0, 0, 0);
-        while (levelEndMask.color.a < 1)
-        {
-            levelEndMask.color = new Color(0, 0, 0, levelEndMask.color.a + Time.deltaTime / duration);
-            yield return null;
-        }
-        yield return new WaitForSeconds(2);
-        lavelWinUI.SetActive(true);
-    }
-    
-    private IEnumerator FadeInText(TextMeshProUGUI text, float duration)
-    {
-        // if the text is already visible do nothing
-        if (Mathf.Abs(text.alpha - 1.0f) < Mathf.Epsilon || text.gameObject.activeSelf)
-        {
-            yield break;
-        }
         
-        float startAlpha = text.alpha;
-        float time = 0;
-
-        while (time < duration)
-        {
-            time += Time.deltaTime;
-            text.alpha = Mathf.Lerp(startAlpha, 1, time / duration);
-            yield return null;
-        }
-        text.alpha = 1;
-    }
-    
-    private IEnumerator FadeOutText(TextMeshProUGUI text, float duration)
-    {
-        // if the text is already invisible do nothing
-        if (text.alpha == 0 || !text.gameObject.activeSelf)
-        {
-            yield break;
-        }
+        // Create animation sequence
+        Sequence winSequence = DOTween.Sequence();
         
-        float startAlpha = text.alpha;
-        float time = 0;
-
-        while (time < duration)
-        {
-            time += Time.deltaTime;
-            text.alpha = Mathf.Lerp(startAlpha, 0, time / duration);
-            yield return null;
-        }
-        text.alpha = 0;
-    }
-    
-    private IEnumerator FadeInImage(Image image, float duration)
-    {
-        // if the image is already visible do nothing
-        if (Mathf.Abs(image.color.a - 1.0f) < Mathf.Epsilon || image.gameObject.activeSelf)
-        {
-            yield break;
-        }
+        // Fade in the mask
+        winSequence.Append(levelEndMask.DOFade(1f, duration));
         
-        float startAlpha = image.color.a;
-        float time = 0;
-
-        while (time < duration)
-        {
-            time += Time.deltaTime;
-            image.color = new Color(image.color.r, image.color.g, image.color.b, Mathf.Lerp(startAlpha, 1, time / duration));
-            yield return null;
-        }
-        image.color = new Color(image.color.r, image.color.g, image.color.b, 1);
-    }
-    
-    private IEnumerator FadeOutImage(Image image, float duration)
-    {
-        // if the image is already invisible do nothing
-        if (image.color.a == 0 || !image.gameObject.activeSelf)
-        {
-            yield break;
-        }
+        // Wait for 2 seconds
+        winSequence.AppendInterval(2f);
         
-        float startAlpha = image.color.a;
-        float time = 0;
-
-        while (time < duration)
-        {
-            time += Time.deltaTime;
-            image.color = new Color(image.color.r, image.color.g, image.color.b, Mathf.Lerp(startAlpha, 0, time / duration));
-            yield return null;
-        }
-        image.color = new Color(image.color.r, image.color.g, image.color.b, 0);
+        // Show the win UI
+        winSequence.AppendCallback(() => levelWinUI.SetActive(true));
+        
+        // Store the sequence reference
+        _levelEndMaskTween = winSequence;
     }
     
     public void UpdateActionCastBar(float progress)
@@ -208,15 +203,50 @@ public class LevelUIManager : Singleton<LevelUIManager>
     
     public void FadeInActionCastBar()
     {
+        // Kill any existing animations on action cast bar
+        if (_actionCastBarTween != null)
+        {
+            _actionCastBarTween.Kill();
+            _actionCastBarTween = null;
+        }
+        
+        if (_actionCastBarProgressTween != null)
+        {
+            _actionCastBarProgressTween.Kill();
+            _actionCastBarProgressTween = null;
+        }
+        
+        // Enable the bars
         actionCastBar.enabled = true;
         actionCastBarProgress.enabled = true;
-        StartCoroutine(FadeInImage(actionCastBar, 0.5f));
-        StartCoroutine(FadeInImage(actionCastBarProgress, 0.5f));   
+        
+        // Start new fade in animations
+        _actionCastBarTween = actionCastBar.DOFade(1f, 0.5f);
+        _actionCastBarProgressTween = actionCastBarProgress.DOFade(1f, 0.5f);
     }
     
     public void FadeOutActionCastBar()
     {
-        StartCoroutine(FadeOutImage(actionCastBar, 0.5f));
-        StartCoroutine(FadeOutImage(actionCastBarProgress, 0.5f));
+        // Kill any existing animations on action cast bar
+        if (_actionCastBarTween != null)
+        {
+            _actionCastBarTween.Kill();
+            _actionCastBarTween = null;
+        }
+        
+        if (_actionCastBarProgressTween != null)
+        {
+            _actionCastBarProgressTween.Kill();
+            _actionCastBarProgressTween = null;
+        }
+        
+        // Start new fade out animations
+        _actionCastBarTween = actionCastBar.DOFade(0f, 0.5f).OnComplete(() => {
+            actionCastBar.enabled = false;
+        });
+        
+        _actionCastBarProgressTween = actionCastBarProgress.DOFade(0f, 0.5f).OnComplete(() => {
+            actionCastBarProgress.enabled = false;
+        });
     }
 }
