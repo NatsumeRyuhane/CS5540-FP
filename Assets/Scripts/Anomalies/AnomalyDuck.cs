@@ -10,6 +10,13 @@ public class AnomalyDuck : AnomalyBehavior
     }
 
     private States _state;
+    private GameObject _player;
+    
+    private void Start()
+    {
+        _state = States.STATIC;
+        _player = Player.gameObject;
+    }
 
     private void Update()
     {

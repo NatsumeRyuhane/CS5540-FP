@@ -14,8 +14,7 @@ public class TransitionTrigger : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             _stageController.OnStateTransitionTriggered();
+            Destroy(gameObject);
         }
-        
-        Destroy(gameObject);
     }
 }

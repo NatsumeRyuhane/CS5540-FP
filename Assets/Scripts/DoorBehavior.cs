@@ -1,8 +1,8 @@
 using System.Collections;
 using Unity.AI.Navigation;
 using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.Serialization;
+using DG.Tweening;
+
 
 [RequireComponent(typeof(AudioSource))]
 public class DoorBehavior : InteractableObject
@@ -17,10 +17,15 @@ public class DoorBehavior : InteractableObject
     public bool doLinkNavMesh = false;
     public NavMeshLink navMeshLink;
 
+    [Header("Animation")]
+    public float doorAnimationDuration = 0.5f;
+    public Ease doorAnimationEase = Ease.InOutQuad;
+
     private GameObject _player;
     private Quaternion _closedRotation;
     private AudioSource _audioSource;
     private bool _isOpen;
+    private Tween _currentTween;
 
     private void Start()
     {
@@ -46,7 +51,7 @@ public class DoorBehavior : InteractableObject
         }
         else
         {
-            StartCoroutine(LevelUIManager.FirePlayerMessage("Seems to be locked..."));
+            UIManager.FirePlayerMessage("Seems to be locked...");
             _audioSource.PlayOneShot(lockedSound);
         }
     }
@@ -69,15 +74,14 @@ public class DoorBehavior : InteractableObject
         {
             navMeshLink.enabled = true;
         }
-        StartCoroutine(OpenAnimation());
-    }
-
-    IEnumerator OpenAnimation(float duration = 0.5f)
-    {
-        var timer = 0f;
-        var initialRotation = transform.rotation;
-
-        // First, determine which direction the player is approaching from
+        
+        // Kill any ongoing animation
+        if (_currentTween != null && _currentTween.IsActive())
+        {
+            _currentTween.Kill();
+        }
+        
+        // Determine which direction the player is approaching from
         var vectorToPlayer = _player.transform.position - transform.position;
         vectorToPlayer.y = 0; // Ignore height differences
 
@@ -89,17 +93,11 @@ public class DoorBehavior : InteractableObject
 
         // Apply rotation around the door's y-axis (vertical axis)
         var targetRotation = transform.rotation * Quaternion.Euler(0, rotationAngle, 0);
-
-        while (timer < duration)
-        {
-            transform.rotation = Quaternion.Lerp(initialRotation, targetRotation, timer / duration);
-            timer += Time.deltaTime;
-            yield return null;
-        }
-
-        transform.rotation = targetRotation;
+        
+        // Animate using DOTween
+        _currentTween = transform.DORotateQuaternion(targetRotation, doorAnimationDuration)
+            .SetEase(doorAnimationEase);
     }
-
 
     public void Close()
     {
@@ -108,22 +106,15 @@ public class DoorBehavior : InteractableObject
         {
             navMeshLink.enabled = false;
         }
-        StartCoroutine(CloseAnimation());
-    }
-
-    IEnumerator CloseAnimation(float duration = 0.5f)
-    {
-        var timer = 0f;
-        var initialRotation = transform.rotation;
-        var targetRotation = _closedRotation;
-
-        while (timer < duration)
+        
+        // Kill any ongoing animation
+        if (_currentTween != null && _currentTween.IsActive())
         {
-            transform.rotation = Quaternion.Lerp(initialRotation, targetRotation, timer / duration);
-            timer += Time.deltaTime;
-            yield return null;
+            _currentTween.Kill();
         }
-
-        transform.rotation = targetRotation;
+        
+        // Animate using DOTween
+        _currentTween = transform.DORotateQuaternion(_closedRotation, doorAnimationDuration)
+            .SetEase(doorAnimationEase);
     }
 }
