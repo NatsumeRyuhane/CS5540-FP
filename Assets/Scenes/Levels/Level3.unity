@@ -4655,6 +4655,10 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Light
       objectReference: {fileID: 0}
+    - target: {fileID: 5641880714711811610, guid: df95b75aecd4d8e4390f298be03fadae, type: 3}
+      propertyPath: m_ColorTemperature
+      value: 3769
+      objectReference: {fileID: 0}
     - target: {fileID: 5706565920980577196, guid: df95b75aecd4d8e4390f298be03fadae, type: 3}
       propertyPath: m_Mesh
       value: 
