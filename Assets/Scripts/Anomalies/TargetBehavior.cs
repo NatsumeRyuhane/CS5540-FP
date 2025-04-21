@@ -14,6 +14,9 @@ public class TargetBehavior : InteractableObject
     [Tooltip("Color to change to when the target is completed")]
     public Color completedColor = Color.green;
 
+    [Tooltip("Duration for fade in/out animations")]
+    public float fadeAnimationDuration = 1f;
+
     /// <summary>
     /// Whether this target has been completed
     /// </summary>
@@ -25,6 +28,8 @@ public class TargetBehavior : InteractableObject
     private AudioSource _audioSource;
     private Renderer _renderer;
     private bool _isInitialActive;
+    private Color _initialColor;
+    private Tween _currentFadeTween;
 
     // Unity Lifecycle Methods
 
@@ -40,6 +45,12 @@ public class TargetBehavior : InteractableObject
     {
         _audioSource = GetComponent<AudioSource>();
         _isInitialActive = gameObject.activeSelf;
+        _initialColor = _renderer.material.color;
+    }
+
+    private void OnEnable()
+    {
+        FadeIn();
     }
 
     // Interaction Methods
@@ -91,12 +102,68 @@ public class TargetBehavior : InteractableObject
     }
 
     /// <summary>
+    /// Fades in the target object
+    /// </summary>
+    public void FadeIn()
+    {
+        // Kill any existing tween
+        if (_currentFadeTween != null && _currentFadeTween.IsActive())
+            _currentFadeTween.Kill();
+            
+        // Get current color and set alpha to 0
+        Color currentColor = _renderer.material.color;
+        _renderer.material.color = new Color(currentColor.r, currentColor.g, currentColor.b, 0);
+        
+        // Animate alpha back to 1
+        _currentFadeTween = DOTween.To(
+            () => _renderer.material.color,
+            color => _renderer.material.color = color,
+            new Color(currentColor.r, currentColor.g, currentColor.b, 1),
+            fadeAnimationDuration)
+            .SetEase(Ease.OutQuad);
+    }
+    
+    /// <summary>
+    /// Fades out the target object and then disables it
+    /// </summary>
+    public void FadeOutAndDisable()
+    {
+        // Kill any existing tween
+        if (_currentFadeTween != null && _currentFadeTween.IsActive())
+            _currentFadeTween.Kill();
+            
+        Color currentColor = _renderer.material.color;
+        
+        // Animate to alpha 0
+        _currentFadeTween = DOTween.To(
+            () => _renderer.material.color,
+            color => _renderer.material.color = color,
+            new Color(currentColor.r, currentColor.g, currentColor.b, 0),
+            fadeAnimationDuration)
+            .SetEase(Ease.InQuad)
+            .OnComplete(() => {
+                // Disable the object when fade completes
+                gameObject.SetActive(false);
+                // Reset alpha for next enable
+                _renderer.material.color = new Color(currentColor.r, currentColor.g, currentColor.b, 1);
+            });
+    }
+
+    /// <summary>
     /// Resets the target to its initial state
     /// </summary>
     public void Reset()
     {
         Completed = false;
-        _renderer.material.color = Color.white;
-        gameObject.SetActive(_isInitialActive);
+        _renderer.material.color = _initialColor;
+        
+        if (_isInitialActive && !gameObject.activeSelf)
+        {
+            gameObject.SetActive(true);
+        }
+        else if (!_isInitialActive && gameObject.activeSelf)
+        {
+            FadeOutAndDisable();
+        }
     }
 }

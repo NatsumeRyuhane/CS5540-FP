@@ -99,6 +99,7 @@ public class StageController : MonoBehaviour
             if (anomaly == null)
             {
                 Debug.LogWarning("Anomaly generation failed.");
+                LevelManager.Instance.ClearAnomaly();
                 return;
             }
             else
