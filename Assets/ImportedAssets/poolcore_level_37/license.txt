@@ -1,0 +1,11 @@
+Model Information:
+* title:	Poolcore Level 37
+* source:	https://sketchfab.com/3d-models/poolcore-level-37-c6fb62d1182c45518a8d8ebbd18c9687
+* author:	neutron star (https://sketchfab.com/trydofor)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Poolcore Level 37" (https://sketchfab.com/3d-models/poolcore-level-37-c6fb62d1182c45518a8d8ebbd18c9687) by neutron star (https://sketchfab.com/trydofor) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
