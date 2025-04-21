@@ -12,7 +12,7 @@ public class AnomalyDuck : AnomalyBehavior
     private States _state;
     private GameObject _player;
     
-    private void Start()
+    private void OnEnable()
     {
         _state = States.STATIC;
         _player = Player.gameObject;
@@ -29,7 +29,12 @@ public class AnomalyDuck : AnomalyBehavior
                 break;
             case States.FOLLOW_PLAYER:
                 // turn to look at player
-                transform.LookAt(_player.transform.position);
+                Vector3 direction = _player.transform.position - transform.position;
+                direction.y = 0; // Remove vertical component
+                if (direction != Vector3.zero)
+                {
+                    transform.rotation = Quaternion.LookRotation(direction);
+                }
                 break;
         }
     }
@@ -38,14 +43,14 @@ public class AnomalyDuck : AnomalyBehavior
     {
         if (_state == States.STATIC)
         {
-            if (!IsThisVisibleInCamera())
+            if (!IsThisVisibleInMainCamera())
             {
                 _state = States.FOLLOW_PLAYER;
             }
         }
         else if (_state == States.FOLLOW_PLAYER)
         {
-            if (IsThisVisibleInCamera())
+            if (IsThisVisibleInMainCamera())
             {
                 _state = States.STATIC;
             }
@@ -61,14 +66,5 @@ public class AnomalyDuck : AnomalyBehavior
     {
         return;
     }
-
-    protected override void OnAwake()
-    {
-        return;
-    }
-
-    protected override void OnAnomalyEffectEnd()
-    {
-        return;
-    }
+    
 }

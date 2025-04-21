@@ -12,8 +12,7 @@ public class CameraController : Singleton<CameraController>
 
     [Header("Raycast")] public float raycastRange = 100f;
     private GameObject _lookingAt;
-
-    private LevelManager _levelManager;
+    
 
 
     void Start()
@@ -22,14 +21,13 @@ public class CameraController : Singleton<CameraController>
 
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
-
-        _levelManager = FindFirstObjectByType<LevelManager>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!_levelManager.AllowPlayerControl) return;
+        TargetUpdate();
+        if (!PlayerController.Instance.AllowPlayerControl) return;
 
         float moveX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float moveY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
@@ -46,20 +44,9 @@ public class CameraController : Singleton<CameraController>
         }
     }
 
-    private void FixedUpdate()
-    {
-        TargetUpdate();
-    }
-
     void TargetUpdate()
     {
-        RaycastHit hit;
-
-        if (Physics.Raycast(transform.position, transform.forward, out hit, raycastRange))
-        {
-            _lookingAt = hit.collider.gameObject;
-        }
-        else _lookingAt = null;
+        _lookingAt = Physics.Raycast(transform.position, transform.forward, out var hit, raycastRange) ? hit.collider.gameObject : null;
     }
 
     public GameObject GetLookingAt()

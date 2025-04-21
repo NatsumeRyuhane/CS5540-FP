@@ -20,6 +20,8 @@ public class LevelUIManager : Singleton<LevelUIManager>
     
     [Header("UI Prefabs")]
     public GameObject objectiveTextPrefab;
+    
+    private bool _isPlayerMessageDisplaying = false;
 
     // Store references to active tweens for interruption handling
     private Tween _playerMessageTween;
@@ -111,29 +113,37 @@ public class LevelUIManager : Singleton<LevelUIManager>
     {
         // Update message text
         playerMessageText.text = message;
-        
+
         // Kill any existing animation sequence
         if (_playerMessageTween != null)
         {
             _playerMessageTween.Kill();
             _playerMessageTween = null;
         }
-        
+
         // Create a new animation sequence
         Sequence messageSequence = DOTween.Sequence();
-        
-        // If text is not already visible, fade it in
-        if (playerMessageText.alpha < 0.99f)
+
+        // If a message is already displaying, don't fade in again
+        if (!_isPlayerMessageDisplaying)
         {
+            // Fade in the message
             messageSequence.Append(playerMessageText.DOFade(1f, 0.5f));
+            _isPlayerMessageDisplaying = true;
         }
-        
+        else
+        {
+            // If already displaying, ensure it's fully visible
+            playerMessageText.alpha = 1f;
+        }
+
         // Wait for duration
         messageSequence.AppendInterval(duration);
-        
+
         // Fade out
-        messageSequence.Append(playerMessageText.DOFade(0f, 0.5f));
-        
+        messageSequence.Append(playerMessageText.DOFade(0f, 0.5f))
+            .OnComplete(() => _isPlayerMessageDisplaying = false);
+
         // Store the sequence reference
         _playerMessageTween = messageSequence;
     }

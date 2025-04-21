@@ -10,62 +10,83 @@ public class LevelManager : Singleton<LevelManager>
     [Header("Level Info")]
     public string levelDisplayName;
     public string nextLevelName;
+    public bool isLastLevel;
 
-    [Header("Level Config")] 
+    [Header("Level Config")]
     public float levelTime;
     public AnomalyBehavior[] anomalies;
-    [FormerlySerializedAs("StagePrefab")] 
+    public int anomalyGenerationChance;
     public GameObject stagePrefab;
     [SerializeField] private GameObject persistentObjectsAnchor;
-    
-    // State properties
+
     [HideInInspector] public float LevelTimer { get; private set; }
     [HideInInspector] public bool IsLevelComplete { get; private set; }
     [HideInInspector] public bool IsLevelFailed { get; private set; }
-    [HideInInspector] public bool AllowPlayerControl { get; private set; }
     [HideInInspector] public bool WasButtonPressed { get; private set; }
+    
 
-    // Private fields
     private readonly HashSet<TargetBehavior> _targets = new HashSet<TargetBehavior>();
     private readonly List<Objects.Objective> _objectives = new List<Objects.Objective>();
-    private LevelUIManager _uiManager;
+    private int _anomalyIndex = -1;
+    private bool _isAnomalyActive;
 
     private void Start()
     {
-        _uiManager = LevelUIManager.Instance;
+        // warn about potentially wrong isLastLevel setting
+        if (isLastLevel && !string.IsNullOrEmpty(nextLevelName))
+        {
+            Debug.LogWarning("isLastLevel is set to true, but nextLevelName is not empty. " +
+                             "Next Level will not load properly.");
+        }
+        
         InitializeLevel();
+        Debug.Log($"Level Initialized with name: {levelDisplayName}, " +
+                  $"anomaly generation chance: {anomalyGenerationChance}, " +
+                  $"anomaly count: {anomalies.Length}, " +
+                  $"target registration count: {_targets.Count}");
     }
 
     private void InitializeLevel()
     {
-        _uiManager.UpdateLevelName(levelDisplayName);
-        _uiManager.UpdateTime("12 AM");
+        LevelUIManager.Instance.UpdateLevelName(levelDisplayName);
+        LevelUIManager.Instance.UpdateTime("12 AM");
         StartCoroutine(HideGuideText());
-        
-        SetAllowPlayerControl(true);
-        _uiManager.FirePlayerMessage("I need to get out before the clock strikes 6 AM.");
-        
-        CreateLevelObjective("Find and report any anomaly.");
+
+        PlayerController.Instance.SetAllowPlayerControl(true);
+        LevelUIManager.Instance.FirePlayerMessage("I need to get out before the clock strikes 6 AM.");
+
+        ResetLevelProgress();
     }
 
     private void Update()
     {
         if (IsLevelFailed || IsLevelComplete)
             return;
-        
+
         UpdateLevelTimer();
     }
 
     private void UpdateLevelTimer()
     {
         LevelTimer += Time.deltaTime;
-        _uiManager.UpdateTime(CalculateInGameTime(LevelTimer) + " AM");
-        
+        LevelUIManager.Instance.UpdateTime(CalculateInGameTime(LevelTimer) + " AM");
+
         if (LevelTimer >= levelTime)
             LevelFail();
     }
 
-    // Objective management
+    private string CalculateInGameTime(float time)
+    {
+        int hour = (int)Mathf.Floor(LevelTimer / (levelTime / 6));
+        return hour == 0 ? "12" : hour.ToString();
+    }
+
+    private IEnumerator HideGuideText()
+    {
+        yield return new WaitForSeconds(10);
+        LevelUIManager.Instance.SetGuideTextDisplay(false);
+    }
+
     public void CreateLevelObjective(string objective)
     {
         var obj = new Objects.Objective
@@ -75,91 +96,63 @@ public class LevelManager : Singleton<LevelManager>
             IsActive = true,
             IsFailed = false
         };
-        
-        obj.UIElement = _uiManager.CreateObjective(objective);
+
+        obj.UIElement = LevelUIManager.Instance.CreateObjective(objective);
         _objectives.Add(obj);
     }
-    
+
     public void UpdateLevelObjective()
     {
         if (_objectives.Count == 0)
             return;
-        
+
         var obj = _objectives[0];
-        
+
         int completed = 0;
         int total = _targets.Count;
-        
+
         foreach (var target in _targets)
         {
             if (target.Completed)
                 completed++;
         }
-        
-        string objDesc = $"Find and interact with all anomaly. ({completed}/{total})";
-        _uiManager.UpdateObjective(objDesc, obj.UIElement);
-    }
 
-    // Level state management
+        string objDesc = $"Find and interact with all anomaly. ({completed}/{total})";
+        LevelUIManager.Instance.UpdateObjective(objDesc, obj.UIElement);
+    }
     public void CheckLevelCompleteCondition()
-    { 
+    {
         UpdateLevelObjective();
-        
-        bool allTargetsCompleted = true;
+
+        var allTargetsCompleted = true;
+        var completedTargets = 0;
         foreach (var target in _targets)
         {
             if (!target.Completed)
             {
                 allTargetsCompleted = false;
-                break;
+            } else
+            {
+                completedTargets++;
             }
         }
-       
+        
+        Debug.Log($"Completed targets: {completedTargets}/{_targets.Count}");
         IsLevelComplete = allTargetsCompleted;
     }
-    
+
     public void LevelComplete()
     {
         IsLevelComplete = true;
-        SetAllowPlayerControl(false);
-        _uiManager.DoLevelCompleteSequence(3);
+        PlayerController.Instance.SetAllowPlayerControl(false);
+        LevelUIManager.Instance.DoLevelCompleteSequence(3);
     }
 
     public void LevelFail()
     {
         IsLevelFailed = true;
-        SetAllowPlayerControl(false);
-        _uiManager.DoLevelFailSequence(3);
-    }
-    
-    public void SetAllowPlayerControl(bool allow)
-    {
-        AllowPlayerControl = allow;
-        Cursor.visible = !allow;
-        Cursor.lockState = allow ? CursorLockMode.Locked : CursorLockMode.None;
-    }
-
-    // Level utility methods
-    private string CalculateInGameTime(float time)
-    {
-        int hour = (int)Mathf.Floor(LevelTimer / (levelTime/6));
-        return hour == 0 ? "12" : hour.ToString();
-    }
-    
-    private IEnumerator HideGuideText()
-    {
-        yield return new WaitForSeconds(10);
-        _uiManager.SetGuideTextDisplay(false);
-    }
-
-    public void MoveObjects(Vector3 direction)
-    {
-       persistentObjectsAnchor.transform.position += direction;
-    }
-    
-    public void SetButtonPressed(bool pressed)
-    {
-        WasButtonPressed = pressed;
+        PlayerController.Instance.SetAllowPlayerControl(false);
+        LevelUIManager.Instance.DoLevelFailSequence(3);
     }
 
     public void ResetLevelProgress()
@@ -168,34 +161,92 @@ public class LevelManager : Singleton<LevelManager>
         {
             target.Reset();
         }
-        
+
         foreach (var anomaly in anomalies)
         {
             anomaly.Reset();
         }
+
+        // shuffle the anomalies array
+        for (int i = 0; i < anomalies.Length; i++)
+        {
+            int randomIndex = UnityEngine.Random.Range(i, anomalies.Length);
+            (anomalies[i], anomalies[randomIndex]) = (anomalies[randomIndex], anomalies[i]);
+        }
+        
+        _anomalyIndex = -1;
     }
-    
-    // Level navigation
-    public void ReloadLevel()
+
+    public void MoveObjects(Vector3 direction)
     {
-        LoadingManager.Instance.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+        persistentObjectsAnchor.transform.position += direction;
     }
-    
-    public void ExitToMainMenu()
+
+    public void SetButtonPressed(bool pressed)
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+        WasButtonPressed = pressed;
     }
-    
-    public void LoadNextLevel()
+
+    public void SetButtonPressed()
     {
-        LoadingManager.Instance.LoadScene(nextLevelName);
+        WasButtonPressed = true;
+    }
+
+    public AnomalyBehavior GenerateAnomaly()
+    {
+        if (_anomalyIndex >= anomalies.Length - 1)
+        {
+            ClearAnomaly();            
+            return null;
+        }
+
+        _anomalyIndex++;
+        _isAnomalyActive = true;
+        return anomalies[_anomalyIndex];
+    }
+
+    public void ClearAnomaly()
+    {
+        _isAnomalyActive = false;
     }
     
-    // Target registration
+    public AnomalyBehavior GetActiveAnomaly()
+    {
+        if (_anomalyIndex < 0 || _anomalyIndex >= anomalies.Length)
+            return null;
+        
+        if (_isAnomalyActive)
+            return anomalies[_anomalyIndex];
+        else
+            return null;
+    }
+
     public void RegisterTarget(TargetBehavior target)
     {
         _targets.Add(target);
         CheckLevelCompleteCondition();
         UpdateLevelObjective();
+    }
+
+    public void ReloadLevel()
+    {
+        LoadingManager.Instance.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+    }
+
+    public void ExitToMainMenu()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+    }
+
+    public void LoadNextLevel()
+    {
+        if (isLastLevel)
+        {
+            Debug.Log("This is the last level. No next level to load.");
+            ExitToMainMenu();
+            return;
+        }
+        
+        LoadingManager.Instance.LoadScene(nextLevelName);
     }
 }

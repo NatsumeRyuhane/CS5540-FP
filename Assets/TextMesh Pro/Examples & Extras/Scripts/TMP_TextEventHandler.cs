@@ -124,16 +124,13 @@ namespace TMPro
         {
             if (TMP_TextUtilities.IsIntersectingRectTransform(m_TextComponent.rectTransform, Input.mousePosition, m_Camera))
             {
-                #region Nearest Character
                 /*int charIndex = TMP_TextUtilities.FindNearestCharacterOnLine(m_TextComponent, Input.mousePosition, 0, m_Camera, false);
                 if (charIndex != -1 && charIndex != m_lastCharIndex)
                 {
                     m_lastCharIndex = charIndex;
                 }*/
-                #endregion
 
 
-                #region Example of Character or Sprite Selection
                 int charIndex = TMP_TextUtilities.FindIntersectingCharacter(m_TextComponent, Input.mousePosition, m_Camera, true);
                 if (charIndex != -1 && charIndex != m_lastCharIndex)
                 {
@@ -147,10 +144,8 @@ namespace TMPro
                     else if (elementType == TMP_TextElementType.Sprite)
                         SendOnSpriteSelection(m_TextComponent.textInfo.characterInfo[charIndex].character, charIndex);
                 }
-                #endregion
 
 
-                #region Example of Word Selection
                 // Check if Mouse intersects any words and if so assign a random color to that word.
                 int wordIndex = TMP_TextUtilities.FindIntersectingWord(m_TextComponent, Input.mousePosition, m_Camera);
                 if (wordIndex != -1 && wordIndex != m_lastWordIndex)
@@ -163,10 +158,8 @@ namespace TMPro
                     // Send the event to any listeners.
                     SendOnWordSelection(wInfo.GetWord(), wInfo.firstCharacterIndex, wInfo.characterCount);
                 }
-                #endregion
 
 
-                #region Example of Line Selection
                 // Check if Mouse intersects any words and if so assign a random color to that word.
                 int lineIndex = TMP_TextUtilities.FindIntersectingLine(m_TextComponent, Input.mousePosition, m_Camera);
                 if (lineIndex != -1 && lineIndex != m_lastLineIndex)
@@ -186,10 +179,8 @@ namespace TMPro
                     string lineText = new string(buffer);
                     SendOnLineSelection(lineText, lineInfo.firstCharacterIndex, lineInfo.characterCount);
                 }
-                #endregion
 
 
-                #region Example of Link Handling
                 // Check if mouse intersects with any links.
                 int linkIndex = TMP_TextUtilities.FindIntersectingLink(m_TextComponent, Input.mousePosition, m_Camera);
 
@@ -204,7 +195,6 @@ namespace TMPro
                     // Send the event to any listeners.
                     SendOnLinkSelection(linkInfo.GetLinkID(), linkInfo.GetLinkText(), linkIndex);
                 }
-                #endregion
             }
             else
             {

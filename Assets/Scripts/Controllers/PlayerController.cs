@@ -18,6 +18,8 @@ public class PlayerController : Singleton<PlayerController>
 
     private GameObject _lookingAt;
     private Vector3 _moveDirection;
+    
+    [HideInInspector] public bool AllowPlayerControl { get; private set; }
 
     private void Start()
     {
@@ -78,5 +80,12 @@ public class PlayerController : Singleton<PlayerController>
     public GameObject GetPlayerLookingAt()
     {
         return _lookingAt;
+    }
+    
+    public void SetAllowPlayerControl(bool allow)
+    {
+        AllowPlayerControl = allow;
+        Cursor.visible = !allow;
+        Cursor.lockState = allow ? CursorLockMode.Locked : CursorLockMode.None;
     }
 }

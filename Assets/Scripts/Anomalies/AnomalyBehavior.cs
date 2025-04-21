@@ -1,13 +1,33 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Collider))]
 public abstract class AnomalyBehavior : InteractableObject
 {
-    protected bool _isActive { get; private set; }
-    protected bool _isResolved { get; private set; }
+    public GameObject anomalyPrefab;
+    public GameObject targetPrefab;
+
+    [SerializeField] private String AnomalyName;
     
-    protected bool IsThisVisibleInCamera()
+    protected bool IsActive { get; private set; }
+    protected bool IsSolved { get; private set; }
+    
+    private void Start()
+    {
+        if (targetPrefab == null)
+            throw new ArgumentNullException(nameof(targetPrefab), "TargetPrefab cannot be null");
+        
+        Reset();
+        OnStart();
+    }
+    
+    protected virtual void OnStart() 
+    {
+        // Override this method to implement specific anomaly effects
+    }
+    
+    protected bool IsThisVisibleInMainCamera()
     {
         var cam = Camera.main;
         if (cam == null)
@@ -25,19 +45,60 @@ public abstract class AnomalyBehavior : InteractableObject
     
     public void SetActive(bool isActive)
     {
-        _isActive = isActive;
+        IsActive = isActive;
     }
     
-    public void SetResolved(bool isResolved)
+    public void Activate()
     {
-        _isResolved = isResolved;
+        if (IsActive)
+            return;
+
+        IsActive = true;
+        OnAnomalyEffectStart();
+        anomalyPrefab.SetActive(true);
     }
     
-    protected abstract void OnAnomalyEffectEnd();
+    public void Deactivate()
+    {
+        if (!IsActive)
+            return;
+        
+        OnAnomalyEffectEnd();
+        IsActive = false;
+        anomalyPrefab.SetActive(false);
+    }
+
+    protected virtual void OnAnomalyEffectStart()
+    {
+        // Override this method to implement specific anomaly effects
+    }
+    
+    protected virtual void OnAnomalyEffectEnd()
+    {
+        // Override this method to implement specific anomaly effects
+    }
+    
+    public void SetSolved(bool isSolved)
+    {
+        IsSolved = isSolved;
+        targetPrefab.SetActive(isSolved);
+    }
 
     public void Reset()
     {
-        _isActive = false;
-        _isResolved = false;
+        IsActive = false;
+        anomalyPrefab.SetActive(false);
+        targetPrefab.SetActive(false);
+        IsSolved = false;
+    }
+    public string GetAnomalyName()
+    {
+        if (string.IsNullOrEmpty(AnomalyName))
+        {
+            Debug.LogWarning($"Anomaly name is not set for {gameObject.name}");
+            return "Unnamed Anomaly";
+        }
+        
+        return AnomalyName;
     }
 }

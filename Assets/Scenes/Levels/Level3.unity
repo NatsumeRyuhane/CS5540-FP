@@ -1098,8 +1098,8 @@ Camera:
   m_GameObject: {fileID: 330585543}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -9331,8 +9331,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 896a20bcc553069498ce8e4844e8ea31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shrinkRate: 0.001
+  anomalyPrefab: {fileID: 0}
+  targetPrefab: {fileID: 0}
+  AnomalyName: 
+  shrinkDuration: 60
   minScale: 0.01
+  shrinkEase: 1
 --- !u!43 &838138834
 Mesh:
   m_ObjectHideFlags: 0
@@ -13645,10 +13649,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dontDestroyOnLoad: 0
-  levelDisplayName: Day 2
+  levelDisplayName: Day 3
   nextLevelName: 
+  isLastLevel: 0
   levelTime: 120
   anomalies: []
+  anomalyGenerationChance: 0
   stagePrefab: {fileID: 8131740630294690006, guid: df95b75aecd4d8e4390f298be03fadae, type: 3}
   persistentObjectsAnchor: {fileID: 231351407}
 --- !u!4 &1610559691
@@ -13848,8 +13854,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 896a20bcc553069498ce8e4844e8ea31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shrinkRate: 0.001
+  anomalyPrefab: {fileID: 0}
+  targetPrefab: {fileID: 0}
+  AnomalyName: 
+  shrinkDuration: 60
   minScale: 0.01
+  shrinkEase: 1
 --- !u!43 &1675894488
 Mesh:
   m_ObjectHideFlags: 0
