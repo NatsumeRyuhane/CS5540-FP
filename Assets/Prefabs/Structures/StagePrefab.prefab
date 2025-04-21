@@ -8635,7 +8635,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entryDoor: {fileID: 60057599696336583}
   exitDoor: {fileID: 8918084627800116218}
-  endAreaPrefab: {fileID: 395605812251198030, guid: cc79cd96344ab8d45a980ea767ecdddf, type: 3}
+  endAreaPrefab: {fileID: 4112819910094501436, guid: 3ba805343dd29724fba5b2d5a9f4f6a0, type: 3}
   pivotNext: {fileID: 5058961905201615400}
 --- !u!1 &8235803190294325673
 GameObject:
