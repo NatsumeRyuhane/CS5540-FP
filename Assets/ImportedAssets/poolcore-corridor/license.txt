@@ -1,0 +1,11 @@
+Model Information:
+* title:	poolcore-corridor
+* source:	https://sketchfab.com/3d-models/poolcore-corridor-4c75dbfe7d9747e68589bb36bbbed1ae
+* author:	CatLoveCheese (https://sketchfab.com/trydofor)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "poolcore-corridor" (https://sketchfab.com/3d-models/poolcore-corridor-4c75dbfe7d9747e68589bb36bbbed1ae) by CatLoveCheese (https://sketchfab.com/trydofor) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
