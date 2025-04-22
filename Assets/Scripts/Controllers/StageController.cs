@@ -115,6 +115,11 @@ public class StageController : MonoBehaviour
                 anomaly.Activate();
             }
         }
+        else
+        {
+            Debug.Log("No anomaly generated.");
+            LevelManager.Instance.ClearAnomaly();
+        }
         
         LevelManager.Instance.SetButtonPressed(false);
         Destroy(_lastInstance);
