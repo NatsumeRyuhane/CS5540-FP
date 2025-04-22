@@ -52,6 +52,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8810760818878140724, guid: ab2112363f713e94db886a41259b73e8, type: 3}
+      propertyPath: autoAddToLevelManager
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -233,7 +237,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   anomalyPrefab: {fileID: 6190331054074178815}
   targetPrefab: {fileID: 1903812022206719273}
-  AnomalyName: Duck
 --- !u!1 &6190331054074178815 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2484665033948473043, guid: f1a833ea39938e644a7f3023ac7108d1, type: 3}

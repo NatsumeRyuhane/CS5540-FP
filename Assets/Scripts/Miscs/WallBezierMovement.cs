@@ -1,41 +1,44 @@
 using UnityEngine;
 using System.Collections;
 
-public class WallSmoothMovement : MonoBehaviour
+/// <summary>
+/// Controls smooth horizontal movement of a wall or platform along a curve
+/// </summary>
+public class WallBezierMovement : MonoBehaviour
 {
-    [Header("移动设置")]
-    [Tooltip("墙体向右移动的距离")]
+    [Header("Movement Settings")]
+    [Tooltip("Distance the wall moves to the right")]
     public float moveDistance = 5f;
     
-    [Tooltip("单向移动的时间(秒)")]
+    [Tooltip("Time in seconds for one-way movement")]
     public float moveDuration = 2f;
     
-    [Tooltip("在最远点停留的时间(秒)")]
+    [Tooltip("Time in seconds to wait at furthest point")]
     public float waitTime = 1f;
     
-    [Tooltip("是否自动循环播放动画")]
+    [Tooltip("Whether to automatically loop the animation")]
     public bool loopAnimation = true;
     
-    // 存储初始位置
+    // Store initial position
     private Vector3 initialPosition;
     private Vector3 targetPosition;
     
-    // 动画是否正在播放
+    // Is animation currently playing
     private bool isMoving = false;
     
     void Start()
     {
-        // 保存初始位置
+        // Save initial position
         initialPosition = transform.position;
-        // 计算目标位置(向右移动)
+        // Calculate target position (move right)
         targetPosition = initialPosition + new Vector3(moveDistance, 0, 0);
         
-        // 自动开始动画
+        // Auto-start animation
         if (loopAnimation)
             StartMovement();
     }
     
-    // 开始移动循环
+    // Start movement cycle
     public void StartMovement()
     {
         if (!isMoving)
@@ -48,19 +51,19 @@ public class WallSmoothMovement : MonoBehaviour
         
         while (true)
         {
-            // 向右移动
+            // Move right
             yield return StartCoroutine(MoveWithEasing(initialPosition, targetPosition, moveDuration));
             
-            // 在最右侧等待
+            // Wait at rightmost position
             yield return new WaitForSeconds(waitTime);
             
-            // 向左移动(返回)
+            // Move left (return)
             yield return StartCoroutine(MoveWithEasing(targetPosition, initialPosition, moveDuration));
             
-            // 在初始位置等待
+            // Wait at initial position
             yield return new WaitForSeconds(waitTime);
             
-            // 如果不是循环，就退出
+            // Exit if not looping
             if (!loopAnimation)
                 break;
         }
@@ -68,40 +71,40 @@ public class WallSmoothMovement : MonoBehaviour
         isMoving = false;
     }
     
-    // 平滑移动协程
+    // Smooth movement coroutine
     IEnumerator MoveWithEasing(Vector3 startPos, Vector3 endPos, float duration)
     {
         float elapsedTime = 0;
         
         while (elapsedTime < duration)
         {
-            // 计算已经过的时间比例
+            // Calculate elapsed time ratio
             float t = elapsedTime / duration;
             
-            // 应用平滑插值 - 使用SmoothStep实现缓入缓出效果
-            // SmoothStep公式: 3t² - 2t³，提供平滑的加速和减速
+            // Apply smooth interpolation - SmoothStep for ease-in/out effect
+            // SmoothStep formula: 3t² - 2t³, provides smooth acceleration and deceleration
             float smoothT = Mathf.SmoothStep(0, 1, t);
             
-            // 更新位置
+            // Update position
             transform.position = Vector3.Lerp(startPos, endPos, smoothT);
             
-            // 增加时间
+            // Increment time
             elapsedTime += Time.deltaTime;
             yield return null;
         }
         
-        // 确保准确到达终点
+        // Ensure exact arrival at destination
         transform.position = endPos;
     }
     
-    // 手动触发移动的公共方法
+    // Public method to manually trigger movement
     public void TriggerMove()
     {
         if (!isMoving)
             StartCoroutine(MovementCycle());
     }
     
-    // 手动停止移动的公共方法
+    // Public method to manually stop movement
     public void StopMovement()
     {
         StopAllCoroutines();

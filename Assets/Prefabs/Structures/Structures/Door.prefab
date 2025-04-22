@@ -243,6 +243,10 @@ MonoBehaviour:
   openSound: {fileID: 8300000, guid: 9927ba84d8247ed4faf4fa7d88f76773, type: 3}
   closeSound: {fileID: 8300000, guid: a669b097166a357448ffde56dd015beb, type: 3}
   lockedSound: {fileID: 8300000, guid: 68a2ac70a01490441bdbce2b974910af, type: 3}
+  doLinkNavMesh: 0
+  navMeshLink: {fileID: 0}
+  doorAnimationDuration: 0.5
+  doorAnimationEase: 7
 --- !u!82 &3574437722408842597
 AudioSource:
   m_ObjectHideFlags: 0
@@ -256,7 +260,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.25
   m_Pitch: 1
   Loop: 0
   Mute: 0

@@ -6,7 +6,15 @@ public class LevelEndTrigger : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            LevelManager.Instance.LevelComplete();
+            if (LevelManager.Instance.isLastLevel)
+            {
+                FinalSequenceController.Instance.Begin();
+            }
+            else
+            {
+                LevelManager.Instance.LevelComplete();    
+            }
+            
             Destroy(gameObject);
         }
     }

@@ -88,4 +88,12 @@ public class PlayerController : Singleton<PlayerController>
         Cursor.visible = !allow;
         Cursor.lockState = allow ? CursorLockMode.Locked : CursorLockMode.None;
     }
+    
+    public void TeleportTo(Vector3 position)
+    {
+        // Temporarily disable the CharacterController to allow position change
+        _controller.enabled = false;
+        transform.position = position;
+        _controller.enabled = true;
+    }
 }

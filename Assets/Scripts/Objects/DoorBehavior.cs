@@ -81,6 +81,13 @@ public class DoorBehavior : InteractableObject
             _currentTween.Kill();
         }
         
+        var rotationAngle = 0f;
+        
+        if (_player == null)
+        {
+            _player = GameObject.FindGameObjectWithTag("Player");
+        }
+        
         // Determine which direction the player is approaching from
         var vectorToPlayer = _player.transform.position - transform.position;
         vectorToPlayer.y = 0; // Ignore height differences
@@ -89,7 +96,8 @@ public class DoorBehavior : InteractableObject
         var dotProduct = Vector3.Dot(transform.forward, vectorToPlayer.normalized);
 
         // Determine which way to rotate (clockwise or counter-clockwise) based on player position
-        var rotationAngle = dotProduct > 0 ? -90f : 90f;
+        rotationAngle = dotProduct > 0 ? -90f : 90f;
+        
 
         // Apply rotation around the door's y-axis (vertical axis)
         var targetRotation = transform.rotation * Quaternion.Euler(0, rotationAngle, 0);

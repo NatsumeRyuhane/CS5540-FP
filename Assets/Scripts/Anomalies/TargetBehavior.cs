@@ -25,6 +25,8 @@ public class TargetBehavior : InteractableObject
     /// </summary>
     [HideInInspector]
     public bool Completed { get; private set; }
+    
+    public bool autoAddToLevelManager = true;
 
     // Private fields
     private LevelManager _levelManager;
@@ -39,7 +41,7 @@ public class TargetBehavior : InteractableObject
     protected override void OnAwake()
     {
         _levelManager = LevelManager.Instance;
-        _levelManager.RegisterTarget(this);
+        if (autoAddToLevelManager) _levelManager.RegisterTarget(this);
         _renderer = GetComponent<Renderer>();
         Completed = false;
     }

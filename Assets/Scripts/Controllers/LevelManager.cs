@@ -29,6 +29,8 @@ public class LevelManager : Singleton<LevelManager>
     private readonly List<Objects.Objective> _objectives = new List<Objects.Objective>();
     private int _anomalyIndex = -1;
     private bool _isAnomalyActive;
+    private StageController _currentStage;
+    private StageController _nextStage;
 
     private void Start()
     {
@@ -48,12 +50,23 @@ public class LevelManager : Singleton<LevelManager>
 
     private void InitializeLevel()
     {
+        for (int i = 0; i < anomalies.Length; i++)
+        {
+            if (anomalies[i] == null)
+            {
+                Debug.LogError($"Anomaly at index {i} is null. Please assign a valid anomaly prefab.");
+                continue;
+            }
+            
+            anomalies[i].AddTargetToLevelManager();
+        }
+        
         LevelUIManager.Instance.UpdateLevelName(levelDisplayName);
         LevelUIManager.Instance.UpdateTime("12 AM");
         StartCoroutine(HideGuideText());
 
         PlayerController.Instance.SetAllowPlayerControl(true);
-        LevelUIManager.Instance.FirePlayerMessage("I need to get out before the clock strikes 6 AM.");
+        //LevelUIManager.Instance.FirePlayerMessage("I need to get out before the clock strikes 6 AM.");
 
         ResetLevelProgress();
     }
@@ -196,6 +209,7 @@ public class LevelManager : Singleton<LevelManager>
     {
         if (_anomalyIndex >= anomalies.Length - 1)
         {
+            Debug.Log("No more anomalies to generate.");
             ClearAnomaly();            
             return null;
         }
@@ -248,5 +262,21 @@ public class LevelManager : Singleton<LevelManager>
         }
         
         LoadingManager.Instance.LoadScene(nextLevelName);
+    }
+    
+    public void SetNextStage(StageController stage)
+    {
+        _nextStage = stage;
+    }
+    
+    public void AdvanceStage()
+    {
+        _currentStage = _nextStage;
+        _nextStage = null;
+    }
+    
+    public StageController GetCurrentStageController()
+    {
+        return _currentStage;
     }
 }

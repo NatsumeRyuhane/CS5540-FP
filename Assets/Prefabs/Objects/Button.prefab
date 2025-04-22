@@ -41,7 +41,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2559281327970218678}
-  - component: {fileID: 3603054859924056152}
   m_Layer: 0
   m_Name: Button
   m_TagString: Untagged
@@ -65,19 +64,6 @@ Transform:
   - {fileID: 2251154480890170060}
   m_Father: {fileID: 8625472341971177652}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3603054859924056152
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2751597476671650045}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3cac57dd2e9540de8add19cf89e03ac7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  buttonPressSFX: {fileID: 0}
 --- !u!1 &3005931780916696225
 GameObject:
   m_ObjectHideFlags: 0
@@ -175,6 +161,7 @@ GameObject:
   - component: {fileID: 8625472341971177652}
   - component: {fileID: 7174844277032360497}
   - component: {fileID: -231444898518821131}
+  - component: {fileID: 4460821462569711613}
   m_Layer: 0
   m_Name: Button
   m_TagString: Untagged
@@ -232,3 +219,16 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.7572328, y: 1.2054182, z: 0.36973885}
   m_Center: {x: 0.0420174, y: -0.032680094, z: 0.15639801}
+--- !u!114 &4460821462569711613
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6230557109515282822}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cac57dd2e9540de8add19cf89e03ac7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonPressSFX: {fileID: 8300000, guid: 4ca3a779b57d0d04ab88dcbbb575b960, type: 3}

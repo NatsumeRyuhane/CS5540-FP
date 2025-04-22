@@ -16,7 +16,11 @@ public class ShrinkAnomaly : AnomalyBehavior
     private Tween _shrinkTween;
     private GameObject _player;
     
-
+    protected override void OnAwake()
+    {
+        _anomalyName = "ShrinkAnomaly";
+    }
+    
     protected override void OnStart()
     {
         // Find the player - assuming it has the "Player" tag

@@ -5,6 +5,11 @@ public class StageController : MonoBehaviour
     [Header("Doors")]
     [SerializeField] private DoorBehavior entryDoor;
     [SerializeField] private DoorBehavior exitDoor;
+
+    [Header("Stage Components")] 
+    public GameObject museumDoor;
+    public GameObject museum;
+    
     
     [Header("Stage Prefab")]
     [SerializeField] private GameObject endAreaPrefab;
@@ -49,6 +54,7 @@ public class StageController : MonoBehaviour
             GameObject newInstance = Instantiate(LevelManager.Instance.stagePrefab, spawnPos, pivotNext.transform.rotation);
             newInstance.GetComponent<StageController>().SetLastInstance(this.gameObject);
             LevelManager.Instance.MoveObjects(spawnPos - transform.position);
+            LevelManager.Instance.SetNextStage(newInstance.GetComponent<StageController>());
             
             exitDoor.Close();
             exitDoor.allowInteract = false;
@@ -110,6 +116,7 @@ public class StageController : MonoBehaviour
         }
         
         LevelManager.Instance.SetButtonPressed(false);
+        LevelManager.Instance.AdvanceStage();
         Destroy(_lastInstance);
     }
 }

@@ -3,54 +3,54 @@ using System.Collections;
 using System.Collections.Generic;
 
 /// <summary>
-/// 具有空间感知的音乐播放器，能够模拟隔墙效果和距离衰减
+/// A spatial-aware music player that can simulate wall occlusion effects and distance attenuation
 /// </summary>
-public class SpatialMusicPlayer : MonoBehaviour
+public class MusicPlayer : MonoBehaviour
 {
-    [Header("音频设置")]
-    [Tooltip("要循环播放的音乐片段")]
+    [Header("Audio Settings")]
+    [Tooltip("Music clip to loop")]
     public AudioClip musicClip;
     
-    [Tooltip("基础音量")]
+    [Tooltip("Base volume")]
     [Range(0f, 1f)]
     public float baseVolume = 0.7f;
     
-    [Tooltip("是否自动开始播放")]
+    [Tooltip("Automatically start playing")]
     public bool playOnStart = false;
     
-    [Header("空间音频设置")]
-    [Tooltip("空间混合度 (0=2D, 1=完全3D)")]
+    [Header("Spatial Audio Settings")]
+    [Tooltip("Spatial blend (0=2D, 1=fully 3D)")]
     [Range(0f, 1f)]
     public float spatialBlend = 1f;
     
-    [Tooltip("声音最小距离 (在此距离内音量保持最大)")]
+    [Tooltip("Minimum distance for sound (volume remains maximum within this distance)")]
     public float minDistance = 5f;
     
-    [Tooltip("声音最大距离 (超过此距离将听不到声音)")]
+    [Tooltip("Maximum distance for sound (sound won't be heard beyond this)")]
     public float maxDistance = 50f;
     
-    [Tooltip("音量衰减曲线 (1=线性, 2=平方反比...)")]
+    [Tooltip("Volume rolloff curve (1=linear, 2=square inverse...)")]
     public float rolloffFactor = 1f;
     
-    [Header("隔墙效果设置")]
-    [Tooltip("是否启用隔墙效果")]
+    [Header("Wall Occlusion Settings")]
+    [Tooltip("Enable wall occlusion effects")]
     public bool enableOcclusion = true;
     
-    [Tooltip("射线检测频率 (每X秒检测一次)")]
+    [Tooltip("Ray detection frequency (check every X seconds)")]
     public float occlusionCheckInterval = 0.2f;
     
-    [Tooltip("每个墙壁的音量衰减系数")]
+    [Tooltip("Volume attenuation factor per wall")]
     [Range(0f, 1f)]
     public float wallAttenuationFactor = 0.5f;
     
-    [Tooltip("能够阻挡声音的图层")]
+    [Tooltip("Layers that can block sound")]
     public LayerMask wallLayers;
     
-    [Tooltip("每个墙的最大音量衰减比例")]
+    [Tooltip("Maximum volume attenuation ratio per wall")]
     [Range(0f, 1f)]
     public float maxWallAttenuation = 0.2f;
     
-    // 私有变量
+    // Private variables
     private AudioSource _audioSource;
     private Transform _listenerTransform;
     private int _wallsBetweenPlayerAndSource = 0;
@@ -59,29 +59,29 @@ public class SpatialMusicPlayer : MonoBehaviour
     
     private void Awake()
     {
-        // 获取或添加AudioSource组件
+        // Get or add AudioSource component
         _audioSource = GetComponent<AudioSource>();
         if (_audioSource == null)
         {
             _audioSource = gameObject.AddComponent<AudioSource>();
         }
         
-        // 配置AudioSource基本设置
+        // Configure basic AudioSource settings
         _audioSource.clip = musicClip;
         _audioSource.loop = true;
         _audioSource.volume = baseVolume;
         _audioSource.playOnAwake = false;
         
-        // 配置3D声音设置
+        // Configure 3D sound settings
         _audioSource.spatialBlend = spatialBlend;
         _audioSource.minDistance = minDistance;
         _audioSource.maxDistance = maxDistance;
         _audioSource.rolloffMode = AudioRolloffMode.Custom;
         
-        // 设置音量衰减曲线
+        // Set volume attenuation curve
         AnimationCurve curve = new AnimationCurve();
-        curve.AddKey(0f, 1f);  // 最小距离时音量最大
-        curve.AddKey(1f, 0f);  // 最大距离时音量为0
+        curve.AddKey(0f, 1f);  // Maximum volume at minimum distance
+        curve.AddKey(1f, 0f);  // Zero volume at maximum distance
         
         for (float t = 0.1f; t < 0.9f; t += 0.1f)
         {
@@ -96,7 +96,7 @@ public class SpatialMusicPlayer : MonoBehaviour
     
     private void Start()
     {
-        // 获取主音频监听器
+        // Get main audio listener
         AudioListener listener = FindObjectOfType<AudioListener>();
         if (listener != null)
         {
@@ -104,7 +104,7 @@ public class SpatialMusicPlayer : MonoBehaviour
         }
         else
         {
-            // 如果没有找到音频监听器，通常在主摄像机上
+            // If no audio listener found, it's usually on the main camera
             Camera mainCamera = Camera.main;
             if (mainCamera != null)
             {
@@ -112,17 +112,17 @@ public class SpatialMusicPlayer : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("未找到AudioListener或主摄像机，空间音频可能无法正常工作！");
+                Debug.LogWarning("No AudioListener or main camera found, spatial audio may not work properly!");
             }
         }
         
-        // 如果设置了自动播放，则开始播放
+        // If set to auto-play, start playing
         if (playOnStart && musicClip != null)
         {
             PlayMusic();
         }
         
-        // 开始墙壁检测
+        // Start wall detection
         if (enableOcclusion && _listenerTransform != null)
         {
             StartCoroutine(CheckOcclusion());
@@ -131,7 +131,7 @@ public class SpatialMusicPlayer : MonoBehaviour
     
     private void Update()
     {
-        // 应用墙壁衰减效果
+        // Apply wall attenuation effect
         if (enableOcclusion)
         {
             _audioSource.volume = baseVolume * _currentOcclusionVolumeFactor;
@@ -139,7 +139,7 @@ public class SpatialMusicPlayer : MonoBehaviour
     }
     
     /// <summary>
-    /// 检测播放器和监听器之间是否有墙壁阻隔
+    /// Check if there are walls between the player and the listener
     /// </summary>
     private IEnumerator CheckOcclusion()
     {
@@ -150,7 +150,7 @@ public class SpatialMusicPlayer : MonoBehaviour
                 Vector3 directionToListener = (_listenerTransform.position - transform.position).normalized;
                 float distanceToListener = Vector3.Distance(transform.position, _listenerTransform.position);
                 
-                // 使用射线检测墙壁
+                // Use raycasting to detect walls
                 RaycastHit[] hits = Physics.RaycastAll(
                     transform.position, 
                     directionToListener, 
@@ -158,10 +158,10 @@ public class SpatialMusicPlayer : MonoBehaviour
                     wallLayers
                 );
                 
-                // 计算遇到的墙壁数量
+                // Calculate the number of walls encountered
                 _wallsBetweenPlayerAndSource = hits.Length;
                 
-                // 计算衰减因子
+                // Calculate attenuation factor
                 float attenuationFactor = 1f;
                 
                 for (int i = 0; i < _wallsBetweenPlayerAndSource; i++)
@@ -169,17 +169,17 @@ public class SpatialMusicPlayer : MonoBehaviour
                     attenuationFactor *= (1f - wallAttenuationFactor);
                 }
                 
-                // 确保不会小于最大衰减值
+                // Ensure it's not less than maximum attenuation value
                 attenuationFactor = Mathf.Max(attenuationFactor, maxWallAttenuation);
                 
-                // 平滑过渡到新的衰减值
+                // Smoothly transition to new attenuation value
                 _currentOcclusionVolumeFactor = Mathf.Lerp(
                     _currentOcclusionVolumeFactor, 
                     attenuationFactor, 
                     0.2f
                 );
                 
-                // 可选：调试射线
+                // Optional: Debug ray
                 Debug.DrawRay(transform.position, directionToListener * distanceToListener, 
                     _wallsBetweenPlayerAndSource > 0 ? Color.red : Color.green, 
                     occlusionCheckInterval);
@@ -190,13 +190,13 @@ public class SpatialMusicPlayer : MonoBehaviour
     }
     
     /// <summary>
-    /// 开始播放音乐
+    /// Start playing music
     /// </summary>
     public void PlayMusic()
     {
         if (musicClip == null)
         {
-            Debug.LogWarning("没有指定音乐片段！");
+            Debug.LogWarning("No music clip specified!");
             return;
         }
         
@@ -204,7 +204,7 @@ public class SpatialMusicPlayer : MonoBehaviour
     }
     
     /// <summary>
-    /// 停止播放音乐
+    /// Stop playing music
     /// </summary>
     public void StopMusic()
     {
@@ -212,7 +212,7 @@ public class SpatialMusicPlayer : MonoBehaviour
     }
     
     /// <summary>
-    /// 设置音乐音量
+    /// Set music volume
     /// </summary>
     public void SetVolume(float newVolume)
     {
@@ -220,7 +220,7 @@ public class SpatialMusicPlayer : MonoBehaviour
     }
     
     /// <summary>
-    /// 获取当前墙壁数量（用于调试）
+    /// Get current wall count (for debugging)
     /// </summary>
     public int GetWallCount()
     {
@@ -228,11 +228,11 @@ public class SpatialMusicPlayer : MonoBehaviour
     }
     
     /// <summary>
-    /// 绘制Debug信息
+    /// Draw Debug information
     /// </summary>
     private void OnDrawGizmosSelected()
     {
-        // 绘制最小和最大距离范围
+        // Draw minimum and maximum distance ranges
         Gizmos.color = new Color(0, 1, 0, 0.3f);
         Gizmos.DrawWireSphere(transform.position, minDistance);
         

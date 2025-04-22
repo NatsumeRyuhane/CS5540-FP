@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using DG.Tweening;
 
+/// <summary>
+/// Creates a walking camera shake effect based on player movement
+/// </summary>
 [RequireComponent(typeof(Camera))]
 public class WalkCameraShake : MonoBehaviour
 {

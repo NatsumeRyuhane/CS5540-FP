@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 
-public class AnomalyDuck : AnomalyBehavior
+public class DuckAnomaly : AnomalyBehavior
 {
     private enum States
     {
@@ -11,7 +11,12 @@ public class AnomalyDuck : AnomalyBehavior
 
     private States _state;
     private GameObject _player;
-    
+
+    protected override void OnAwake()
+    {
+        _anomalyName = "DuckAnomaly";
+    }
+
     private void OnEnable()
     {
         _state = States.STATIC;

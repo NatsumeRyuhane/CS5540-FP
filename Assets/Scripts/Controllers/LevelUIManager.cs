@@ -205,6 +205,44 @@ public class LevelUIManager : Singleton<LevelUIManager>
         // Store the sequence reference
         _levelEndMaskTween = winSequence;
     }
+
+    public void DoFakeLevelCompleteSequence(float duration, Vector3 teleportTarget)
+    {
+        PlayerController.Instance.SetAllowPlayerControl(false);
+        // Kill any existing level end animation
+        if (_levelEndMaskTween != null)
+        {
+            _levelEndMaskTween.Kill();
+            _levelEndMaskTween = null;
+        }
+        
+        levelEndMask.gameObject.SetActive(true);
+        levelEndMask.color = new Color(0, 0, 0, 0);
+        
+        // Setup the level end mask
+        levelEndMask.gameObject.SetActive(true);
+        levelEndMask.color = new Color(0, 0, 0, 0);
+        
+        // Create animation sequence
+        Sequence fakeWinSequence = DOTween.Sequence();
+        
+        // Fade in the mask
+        fakeWinSequence.Append(levelEndMask.DOFade(1f, duration));
+        
+        // Wait for 2 seconds
+        fakeWinSequence.AppendInterval(duration - 1f);
+        
+        // disable the end mask and give back control to the player
+        fakeWinSequence.AppendCallback(() =>
+        {
+            PlayerController.Instance.TeleportTo(teleportTarget);
+            levelEndMask.gameObject.SetActive(false);
+            PlayerController.Instance.SetAllowPlayerControl(true);
+        });
+        
+        // Store the sequence reference
+        _levelEndMaskTween = fakeWinSequence;
+    }
     
     public void UpdateActionCastBar(float progress)
     {

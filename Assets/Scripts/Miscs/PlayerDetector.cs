@@ -1,12 +1,26 @@
 using UnityEngine;
 
-public class ElevatorTrigger : MonoBehaviour
+/// <summary>
+/// Detects player presence and can trigger actions when player enters or exits a defined area
+/// </summary>
+public class PlayerDetector : MonoBehaviour
 {
-    // Reference to the elevator door controller script
-    public ElevatorDoorController doorController;
+    [Header("Response Settings")]
+    [Tooltip("Object to notify when player is detected")]
+    public MonoBehaviour targetScript;
     
-    // Optional: Set a delay time for automatic door closing
-    public float autoCloseDelay = 3.0f;
+    [Tooltip("Name of the method to call when player enters")]
+    public string onEnterMethodName = "OnPlayerEnter";
+    
+    [Tooltip("Name of the method to call when player exits")]
+    public string onExitMethodName = "OnPlayerExit";
+    
+    [Tooltip("Time delay before triggering exit event")]
+    public float exitDelay = 0.5f;
+    
+    [Header("Debug Options")]
+    [Tooltip("Enable console logging of events")]
+    public bool enableDebugLogs = false;
     
     // Track whether the player is inside the trigger zone
     private bool playerInTriggerZone = false;
@@ -17,13 +31,15 @@ public class ElevatorTrigger : MonoBehaviour
         // Check if the entering object has the "Player" tag
         if (other.CompareTag("Player"))
         {
-            Debug.Log("Player entered elevator area");
+            if (enableDebugLogs)
+                Debug.Log("Player entered detection area");
+            
             playerInTriggerZone = true;
             
-            // Open the elevator doors
-            if (doorController != null)
+            // Notify target script if available
+            if (targetScript != null)
             {
-                doorController.OpenDoors();
+                targetScript.SendMessage(onEnterMethodName, SendMessageOptions.DontRequireReceiver);
             }
         }
     }
@@ -34,24 +50,32 @@ public class ElevatorTrigger : MonoBehaviour
         // Check if the exiting object has the "Player" tag
         if (other.CompareTag("Player"))
         {
-            Debug.Log("Player left elevator area");
+            if (enableDebugLogs)
+                Debug.Log("Player left detection area");
+            
             playerInTriggerZone = false;
             
-            // Delay closing the elevator doors
-            if (doorController != null)
+            // Delay exit notification
+            if (targetScript != null && !string.IsNullOrEmpty(onExitMethodName))
             {
-                Invoke("CloseDoors", autoCloseDelay);
+                Invoke("NotifyExit", exitDelay);
             }
         }
     }
     
-    // Method to close doors after specified delay
-    private void CloseDoors()
+    // Method to notify of player exit after delay
+    private void NotifyExit()
     {
-        // Only close doors if player is still outside the trigger zone
-        if (!playerInTriggerZone && doorController != null)
+        // Only notify if player is still outside the trigger zone
+        if (!playerInTriggerZone && targetScript != null)
         {
-            doorController.CloseDoors();
+            targetScript.SendMessage(onExitMethodName, SendMessageOptions.DontRequireReceiver);
         }
+    }
+    
+    // Check if player is currently detected
+    public bool IsPlayerDetected()
+    {
+        return playerInTriggerZone;
     }
 }

@@ -8,7 +8,7 @@ public abstract class AnomalyBehavior : InteractableObject
     public GameObject anomalyPrefab;
     public GameObject targetPrefab;
 
-    [SerializeField] private String AnomalyName;
+    protected String _anomalyName;
     
     protected bool IsActive { get; private set; }
     protected bool IsSolved { get; private set; }
@@ -20,6 +20,14 @@ public abstract class AnomalyBehavior : InteractableObject
         
         Reset();
         OnStart();
+    }
+    
+    public void AddTargetToLevelManager()
+    {
+        if (targetPrefab == null)
+            throw new ArgumentNullException(nameof(targetPrefab), "TargetPrefab cannot be null");
+        
+        LevelManager.Instance.RegisterTarget(targetPrefab.GetComponent<TargetBehavior>());
     }
     
     protected virtual void OnStart() 
@@ -93,12 +101,12 @@ public abstract class AnomalyBehavior : InteractableObject
     }
     public string GetAnomalyName()
     {
-        if (string.IsNullOrEmpty(AnomalyName))
+        if (string.IsNullOrEmpty(_anomalyName))
         {
             Debug.LogWarning($"Anomaly name is not set for {gameObject.name}");
             return "Unnamed Anomaly";
         }
         
-        return AnomalyName;
+        return _anomalyName;
     }
 }
