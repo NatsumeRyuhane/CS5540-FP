@@ -4,7 +4,7 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class FollowPlayer : MonoBehaviour
 {
-    // fucku
+    
     [SerializeField] private Transform playerTransform;
     [SerializeField] private float minDistanceToPlayer = 1f;
     [SerializeField] private float updatePathInterval = 0.2f;
