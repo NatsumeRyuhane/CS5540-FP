@@ -17,6 +17,9 @@ public class TargetBehavior : InteractableObject
     [Tooltip("Duration for fade in/out animations")]
     public float fadeAnimationDuration = 1f;
 
+    [Tooltip("Particle system to play when completed")]
+    public ParticleSystem completionParticles;
+
     /// <summary>
     /// Whether this target has been completed
     /// </summary>
@@ -65,6 +68,13 @@ public class TargetBehavior : InteractableObject
         Completed = true;
         _renderer.material.color = completedColor;
         _levelManager.CheckLevelCompleteCondition();
+        
+        // Play particle effect if assigned
+        if (completionParticles != null)
+        {
+            completionParticles.Play();
+        }
+        
         DoPostCompleteAnim(3600f);
     }
 
@@ -156,6 +166,13 @@ public class TargetBehavior : InteractableObject
     {
         Completed = false;
         _renderer.material.color = _initialColor;
+        
+        // Stop particle system if it's playing
+        if (completionParticles != null)
+        {
+            completionParticles.Stop();
+            completionParticles.Clear();
+        }
         
         if (_isInitialActive && !gameObject.activeSelf)
         {
