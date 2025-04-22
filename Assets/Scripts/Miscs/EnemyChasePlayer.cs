@@ -7,7 +7,7 @@ public class EnemyChasePlayer : MonoBehaviour
     public float moveSpeed = 3.0f;
     
     [Tooltip("Stop moving when closer than this distance to player")]
-    public float minDistanceToPlayer = 1.5f;
+    public float minDistanceToPlayer = 0.2f;
     
     [Tooltip("Acceleration factor - higher values mean faster acceleration")]
     public float accelerationFactor = 2.0f;
