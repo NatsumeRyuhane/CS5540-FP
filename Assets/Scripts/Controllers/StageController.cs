@@ -69,6 +69,7 @@ public class StageController : MonoBehaviour
     
     public void OnOffloadTriggered()
     {
+        LevelManager.Instance.AdvanceStage();
         entryDoor.Close();
         entryDoor.allowInteract = false;
         
@@ -116,7 +117,6 @@ public class StageController : MonoBehaviour
         }
         
         LevelManager.Instance.SetButtonPressed(false);
-        LevelManager.Instance.AdvanceStage();
         Destroy(_lastInstance);
     }
 }
