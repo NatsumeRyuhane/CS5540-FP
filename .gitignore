@@ -22,3 +22,6 @@ UserSettings/
 
 # ZIP files
 *.zip
+
+# Ignore WebGL Builds folder
+/WebGL Builds/
