@@ -655,6 +655,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: duck_floaty
       objectReference: {fileID: 0}
+    - target: {fileID: 7157220609684705698, guid: 2b60aaabc8fca934eb7b3426e9a72718, type: 3}
+      propertyPath: isInitialActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -673,6 +677,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 797395578896423635}
     m_Modifications:
+    - target: {fileID: 1484783578445811531, guid: 82f893d61b62a46488bd313410f4fe4d, type: 3}
+      propertyPath: isInitialActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6081790532389491196, guid: 82f893d61b62a46488bd313410f4fe4d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -766,6 +774,10 @@ PrefabInstance:
     - target: {fileID: 2881822100494722874, guid: 937b621e91879f446a2b22a74a3e650a, type: 3}
       propertyPath: m_IsTrigger
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7265961894868353495, guid: 937b621e91879f446a2b22a74a3e650a, type: 3}
+      propertyPath: isInitialActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8016312894644181753, guid: 937b621e91879f446a2b22a74a3e650a, type: 3}
       propertyPath: m_LocalPosition.x
@@ -882,6 +894,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 797395578896423635}
     m_Modifications:
+    - target: {fileID: 529456918352784924, guid: 1ab7db70b3210fc469fd7ccf51569f7c, type: 3}
+      propertyPath: isInitialActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2911755021379491190, guid: 1ab7db70b3210fc469fd7ccf51569f7c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1084,6 +1100,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4816946193976733695, guid: 511edf3c9ef89d144a34acf5540e5f3e, type: 3}
+      propertyPath: isInitialActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8472805383243335055, guid: 511edf3c9ef89d144a34acf5540e5f3e, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.61
@@ -1149,6 +1169,10 @@ PrefabInstance:
     - target: {fileID: 852334917144198346, guid: 6b5c86c1c2f13c94d9cbd670d3e4d1f9, type: 3}
       propertyPath: m_Name
       value: MuseumKnockingDoorAnomaly
+      objectReference: {fileID: 0}
+    - target: {fileID: 3297236669402001653, guid: 6b5c86c1c2f13c94d9cbd670d3e4d1f9, type: 3}
+      propertyPath: isInitialActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3535899196074848364, guid: 6b5c86c1c2f13c94d9cbd670d3e4d1f9, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1226,6 +1250,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 797395578896423635}
     m_Modifications:
+    - target: {fileID: 2301748456652258101, guid: 27a8118c9f1f8e644a16423ab52b1af2, type: 3}
+      propertyPath: isInitialActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2552186549977066025, guid: 27a8118c9f1f8e644a16423ab52b1af2, type: 3}
       propertyPath: m_Name
       value: PlayerMessageAnomaly

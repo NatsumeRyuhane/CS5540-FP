@@ -8,18 +8,19 @@ using DG.Tweening;
 [RequireComponent(typeof(AudioSource))]
 public class TargetBehavior : InteractableObject
 {
+    
+    
     [Header("Target Settings")] [Tooltip("Sound played when the target is completed")]
+    public bool isInitialActive = true;
+    
     public AudioClip completedSound;
-
+    
     [Tooltip("Color to change to when the target is completed")]
     public Color completedColor = Color.green;
 
     [Tooltip("Duration for fade in/out animations")]
     public float fadeAnimationDuration = 1f;
-
-    [Tooltip("Particle system to play when completed")]
-    public ParticleSystem completionParticles;
-
+    
     /// <summary>
     /// Whether this target has been completed
     /// </summary>
@@ -32,7 +33,6 @@ public class TargetBehavior : InteractableObject
     private LevelManager _levelManager;
     private AudioSource _audioSource;
     private Renderer _renderer;
-    private bool _isInitialActive;
     private Color _initialColor;
     private Tween _currentFadeTween;
 
@@ -41,7 +41,12 @@ public class TargetBehavior : InteractableObject
     protected override void OnAwake()
     {
         _levelManager = LevelManager.Instance;
-        if (autoAddToLevelManager) _levelManager.RegisterTarget(this);
+       
+        if (autoAddToLevelManager)
+        {
+            Debug.Log($"Registering target {gameObject.GetInstanceID()} at ({transform.position}) to level manager. Initial active: {isInitialActive}");
+            _levelManager.RegisterTarget(this);
+        }
         _renderer = GetComponent<Renderer>();
         Completed = false;
     }
@@ -49,7 +54,6 @@ public class TargetBehavior : InteractableObject
     public void Start()
     {
         _audioSource = GetComponent<AudioSource>();
-        _isInitialActive = gameObject.activeSelf;
         _initialColor = _renderer.material.color;
     }
 
@@ -71,11 +75,6 @@ public class TargetBehavior : InteractableObject
         _renderer.material.color = completedColor;
         _levelManager.CheckLevelCompleteCondition();
         
-        // Play particle effect if assigned
-        if (completionParticles != null)
-        {
-            completionParticles.Play();
-        }
         
         DoPostCompleteAnim(3600f);
     }
@@ -102,15 +101,15 @@ public class TargetBehavior : InteractableObject
             .SetEase(Ease.Linear)
             .SetRelative(true));
 
-        // Add fade-out effect spanning the entire duration
-        sequence.Insert(0, DOTween.To(
-            () => _renderer.material.color,
-            color => _renderer.material.color = color,
-            new Color(initialColor.r, initialColor.g, initialColor.b, 0),
-            duration));
-
-        // When complete, deactivate the object
-        sequence.OnComplete(() => gameObject.SetActive(false));
+        // Add fade-out effect spanning the entire duration - skip for WebGL
+        if (Application.platform != RuntimePlatform.WebGLPlayer)
+        {
+            sequence.Insert(0, DOTween.To(
+                () => _renderer.material.color,
+                color => _renderer.material.color = color,
+                new Color(initialColor.r, initialColor.g, initialColor.b, 0),
+                duration));
+        }
     }
 
     /// <summary>
@@ -118,12 +117,13 @@ public class TargetBehavior : InteractableObject
     /// </summary>
     public void FadeIn()
     {
+        var currentColor = _renderer.material.color;
+        
         // Kill any existing tween
         if (_currentFadeTween != null && _currentFadeTween.IsActive())
             _currentFadeTween.Kill();
             
         // Get current color and set alpha to 0
-        Color currentColor = _renderer.material.color;
         _renderer.material.color = new Color(currentColor.r, currentColor.g, currentColor.b, 0);
         
         // Animate alpha back to 1
@@ -169,20 +169,14 @@ public class TargetBehavior : InteractableObject
         Completed = false;
         _renderer.material.color = _initialColor;
         
-        // Stop particle system if it's playing
-        if (completionParticles != null)
-        {
-            completionParticles.Stop();
-            completionParticles.Clear();
-        }
-        
-        if (_isInitialActive && !gameObject.activeSelf)
+        if (isInitialActive && !gameObject.activeSelf)
         {
             gameObject.SetActive(true);
         }
-        else if (!_isInitialActive && gameObject.activeSelf)
+        else if (!isInitialActive && gameObject.activeSelf)
         {
             FadeOutAndDisable();
         }
     }
 }
+
