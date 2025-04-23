@@ -46,6 +46,14 @@ public class LevelManager : Singleton<LevelManager>
                   $"anomaly generation chance: {anomalyGenerationChance}, " +
                   $"anomaly count: {anomalies.Length}, " +
                   $"target registration count: {_targets.Count}");
+        
+        // read playerperfs to see if fast mode is enabled
+        bool isFastModeEnabled = PlayerPrefs.GetInt("FastModeEnabled", 0) == 1;
+        if (isFastModeEnabled)
+        {
+            Debug.Log("Fast mode is enabled.");
+            Time.timeScale = 3f; // Set the time scale to 2x
+        }
     }
 
     private void InitializeLevel()

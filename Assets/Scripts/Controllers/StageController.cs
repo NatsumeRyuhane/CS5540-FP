@@ -65,6 +65,8 @@ public class StageController : MonoBehaviour
         {
             LevelManager.Instance.GetActiveAnomaly().Deactivate();
         }
+        
+        Statistics.Instance.IncrementRoomCount();
     }
     
     public void OnOffloadTriggered()

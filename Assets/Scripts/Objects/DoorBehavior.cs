@@ -105,6 +105,8 @@ public class DoorBehavior : InteractableObject
         // Animate using DOTween
         _currentTween = transform.DORotateQuaternion(targetRotation, doorAnimationDuration)
             .SetEase(doorAnimationEase);
+        
+        Statistics.Instance.IncrementDoorsOpened();
     }
 
     public void Close()
